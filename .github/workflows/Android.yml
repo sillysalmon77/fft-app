@@ -50,6 +50,20 @@ jobs:
           grep -n "uses-permission" "$M"
           grep -n "versionCode\|versionName" android/app/build.gradle
 
+      - name: App icon + notification icon
+        run: |
+          # Icon images live in the repo root (easy to upload from a phone)
+          mkdir -p assets
+          cp icon-only.png icon-foreground.png icon-background.png assets/
+          npx -y @capacitor/assets generate --android \
+            --iconBackgroundColor '#050704' --iconBackgroundColorDark '#050704'
+          # Small white tree for the lock-screen / status bar notification
+          mkdir -p android/app/src/main/res/drawable
+          cp ic_stat_fft.png android/app/src/main/res/drawable/ic_stat_fft.png
+          S=android/app/src/main/res/values/strings.xml
+          sed -i 's#</resources>#    <string name="capacitor_background_geolocation_notification_icon">drawable/ic_stat_fft</string>\n    <string name="capacitor_background_geolocation_notification_color">\#d7ff3e</string>\n    <string name="capacitor_background_geolocation_notification_channel_name">FFT tracking</string>\n</resources>#' "$S"
+          cat "$S"
+
       - name: Sync
         run: npx cap sync android
 
