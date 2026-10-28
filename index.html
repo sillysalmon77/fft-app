@@ -4213,6 +4213,54 @@ function nativeNotifText() {
   }
   return { title: 'FFT — GPS on', msg: 'Forestry Field Tracker is using your location' };
 }
+let _logCatchingUp = false;
+async function catchUpFromNativeLog() {
+  if (!_bgGeoActive || _logCatchingUp || !isNativeApp()) return;
+  const plugin = getBgGeoPlugin();
+  if (!plugin || !plugin.getLocationLog) return;
+  _logCatchingUp = true;
+  let replayed = 0;
+  try {
+    for (let page = 0; page < 50; page++) {
+      const res = await plugin.getLocationLog({ afterId: APP._logCursor || 0, limit: 1000 });
+      const entries = (res && res.entries) || [];
+      if (!entries.length) break;
+      for (const ent of entries) {
+        APP._logCursor = Math.max(APP._logCursor || 0, ent.id || 0);
+        const t = ent.time || 0;
+        if (t && APP.gps.lastFixT && t <= APP.gps.lastFixT) continue;   // already had it live
+        onGps(bgLocationToPos(ent), { replay: true });
+        replayed++;
+      }
+      if (entries.length < 1000) break;
+    }
+  } catch (e) { console.warn('catchUpFromNativeLog failed', e); }
+  finally { _logCatchingUp = false; }
+  if (replayed) {
+    // Replayed fixes skip the per-fix screen work, so refresh once at the end
+    updateGpsDot(); updateLeafletMarker(); updateAccBadge(APP.gps.accuracy, false);
+    redrawTrack(); updateTrackReadout();
+    if (APP.gps.follow) { if (APP.mode === 'pdf') centerOnGps(); else if (APP.leaf && APP.gps.lat != null) APP.leaf.setView([APP.gps.lat, APP.gps.lng], APP.leaf.getZoom() || 15); }
+    if (TRACK.recording) toast('Caught up ' + replayed + ' GPS fixes from while locked', 'info');
+  }
+}
+/* On unlock: hold new live fixes, replay the locked stretch from the log,
+   then release the held fixes — so nothing newer jumps the queue */
+async function holdAndCatchUp() {
+  if (APP._holdLive) return;
+  APP._holdLive = true;
+  APP._liveQueue = APP._liveQueue || [];
+  try { await catchUpFromNativeLog(); }
+  finally {
+    const q = APP._liveQueue; APP._liveQueue = []; APP._holdLive = false;
+    q.forEach(loc => onGps(bgLocationToPos(loc)));
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') holdAndCatchUp();
+});
+setInterval(() => { if (document.visibilityState === 'visible') catchUpFromNativeLog(); }, 15000);
+
 async function startNativeGeo(plugin) {
   // Location may already be granted from the app's startup position check, in
   // which case the plugin skips its own permission flow — and that flow is
@@ -4222,19 +4270,36 @@ async function startNativeGeo(plugin) {
     if (plugin.requestPermissions) await plugin.requestPermissions({ permissions: ['location', 'notification'] });
   } catch (e) { console.warn('permission request failed', e); }
   APP.gps.source = 'native';
+  // Fresh native log for this GPS session (see catchUpFromNativeLog)
+  if (!_notifRefreshing) {
+    try { if (plugin.clearLocationLog) await plugin.clearLocationLog(); } catch (e) { console.warn('clearLocationLog failed', e); }
+    APP._logCursor = 0;
+  }
   const n = nativeNotifText();
   return plugin.start({
     backgroundMessage: n.msg,
     backgroundTitle: n.title,
     requestPermissions: true,
     stale: false,
-    distanceFilter: 0
+    distanceFilter: 0,
+    // Native code writes every fix to a log on the phone, which keeps going
+    // while Android has the app's screen (WebView) suspended — i.e. while the
+    // phone is locked. Live callbacks during that time are lost, so we read
+    // the log back on unlock and replay the missed fixes.
+    locationLog: true,
+    locationLogMaxEntries: 50000
   }, (location, error) => {
     if (error) {
       toast('GPS error: ' + (error.message || error.code || 'unknown'), 'err');
       return;
     }
-    if (location) onGps(bgLocationToPos(location));
+    if (!location) return;
+    const nowMs = Date.now();
+    const gap = APP._lastLiveAt && (nowMs - APP._lastLiveAt) > 10000;
+    APP._lastLiveAt = nowMs;
+    if (APP._holdLive) { (APP._liveQueue = APP._liveQueue || []).push(location); return; }
+    if (gap) { APP._liveQueue = [location]; holdAndCatchUp(); return; }
+    onGps(bgLocationToPos(location));
   }).then(() => { _bgGeoActive = true; }).catch(e => {
     console.warn(e);
     // Don't leave GPS dead — fall back to browser GPS, and say why
@@ -4276,6 +4341,7 @@ function startGps() {
       APP.gps.active = true;
       APP.gps.follow = true;
       APP.gps.startTime = Date.now();
+      APP.gps.lastFixT = 0; APP._lastLiveAt = 0;
       APP.gps.recentFixes = [];
       APP._gpsFarWarned = false;
       document.getElementById('fab-gps').classList.add('gps-on');
@@ -4336,6 +4402,7 @@ function stopGps() {
   APP.gps.watchId = null;
   APP.gps.active = false;
   APP.gps.source = null;
+  APP.gps.lastFixT = 0;
   document.getElementById('fab-gps').classList.remove('gps-on');
   document.getElementById('fab-row-recenter').style.display = 'none';
   document.getElementById('fab-row-track').style.display = 'none';
@@ -4348,13 +4415,19 @@ function stopGps() {
   toast('GPS off', 'info');
 }
 
-function onGps(pos) {
+function onGps(pos, opts) {
+  const replay = !!(opts && opts.replay);
   const lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy;
   const t = pos.timestamp || Date.now();
+  // Fixes can now arrive twice (live + from the native log) — keep them in order, once
+  // (A jump back of over a minute is a clock reset, not a duplicate — accept it,
+  // otherwise one bad future timestamp would freeze tracking.)
+  if (APP.gps.lastFixT && t <= APP.gps.lastFixT && (APP.gps.lastFixT - t) < 60000) return;
+  APP.gps.lastFixT = t;
   // Doppler speed (m/s) from the GPS chip, when available. Unlike position it
   // doesn't wander when you stand still, so it's the best "am I moving" signal.
   APP.gps.speed = (typeof pos.coords.speed === 'number' && !isNaN(pos.coords.speed)) ? pos.coords.speed : null;
-  const warming = (Date.now() - APP.gps.startTime) < WARMUP_MS;
+  const warming = (t - APP.gps.startTime) < WARMUP_MS;
 
   // Reject junk fixes once we have a working lock — a sudden ±100m fix
   // after good ones is almost always a cell/wifi fallback, not real GPS.
@@ -4385,11 +4458,13 @@ function onGps(pos) {
 
   APP.gps.lat = dl; APP.gps.lng = dlng; APP.gps.accuracy = dacc;
 
+  if (!replay) {
   updateGpsDot();
   updateLeafletMarker();
   updateAccBadge(dacc, warming);
+  }
 
-  if (APP.gps.follow) {
+  if (!replay && APP.gps.follow) {
     if (APP.mode === 'pdf') {
       // Only follow GPS on PDF if the user is actually within the PDF bounds
       // (with a small buffer). Otherwise the PDF would pan off-screen entirely.
@@ -4408,7 +4483,7 @@ function onGps(pos) {
   if (TRACK.recording && !TRACK.paused && !warming) {
     appendTrackFix(dl, dlng, dacc, t);
   }
-  if (typeof BORDER !== 'undefined' && BORDER.active) { try { borderTick(); } catch (e) {} }
+  if (!replay && typeof BORDER !== 'undefined' && BORDER.active) { try { borderTick(); } catch (e) {} }
 }
 
 /* Returns true if GPS lat/lng is within (or near) the PDF page bounds.
@@ -4455,7 +4530,10 @@ function appendTrackFix(lat, lng, acc, t) {
   if (d < Math.max(TRACK_MIN_MOVE_M, aAcc)) return;
   // Reject spikes: a jump needing you to move faster than TRACK_MAX_SPEED_MS
   const dt = Math.max(1, ((t || Date.now()) - (last.t || 0)) / 1000);
-  if (d / dt > TRACK_MAX_SPEED_MS) return;
+  // If the GPS itself reports high speed you really are moving fast (quad,
+  // vehicle) — only reject jumps well beyond what it reports.
+  const maxSpeed = Math.max(TRACK_MAX_SPEED_MS, (APP.gps.speed || 0) * 1.5 + 3);
+  if (d / dt > maxSpeed) return;
   TRACK.totalDist += d;
   TRACK.pts.push({ lat: aLat, lng: aLng, t, acc: aAcc });
   redrawTrack();
