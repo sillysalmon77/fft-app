@@ -35,6 +35,18 @@ jobs:
           fi
           mkdir -p www
           cp index.html www/index.html
+          # Capacitor's JS runtime provides registerPlugin(), which the app needs
+          # to reach the background GPS plugin. A bundled Capacitor app includes
+          # it automatically; this single-file app doesn't, so add it here.
+          CJS=node_modules/@capacitor/core/dist/capacitor.js
+          if [ ! -f "$CJS" ]; then
+            ls -R node_modules/@capacitor/core/dist || true
+            echo "::error::capacitor.js not found in @capacitor/core"
+            exit 1
+          fi
+          cp "$CJS" www/capacitor.js
+          sed -i '0,/<script/s##<script src="capacitor.js"></script>\n<script#' www/index.html
+          grep -n "capacitor.js" www/index.html
 
       - name: Create Android project
         run: npx cap add android
