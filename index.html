@@ -483,6 +483,52 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .settings-row-sub{
   font-size:12px;color:var(--text-faint);line-height:1.4;
 }
+/* ---- Squad invite buttons ---- */
+.sq-inv-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 6px;border-radius:12px;
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;}
+.sq-inv-wa{background:rgba(37,211,102,0.16);border-color:rgba(37,211,102,0.45);color:#4be08a;}
+/* ---- Profile ---- */
+.pf-saved{position:absolute;right:18px;bottom:12px;font-size:12px;font-weight:700;color:var(--leaf);opacity:0;transition:opacity 200ms;}
+.pf-saved.show{opacity:1;}
+.pf-card{
+  background:linear-gradient(180deg,rgba(217,255,79,0.07),rgba(217,255,79,0.02));
+  border:1px solid rgba(217,255,79,0.22);border-radius:20px;
+  padding:22px 18px 18px;margin-bottom:26px;text-align:center;
+}
+.pf-avatar{position:relative;width:96px;height:96px;margin:0 auto 12px;border-radius:50%;cursor:pointer;
+  background:rgba(255,255,255,0.06);border:2px solid var(--leaf);box-shadow:0 0 22px rgba(217,255,79,0.25);
+  display:flex;align-items:center;justify-content:center;overflow:visible;}
+.pf-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;}
+.pf-avatar #pf-avatar-fallback{font-size:38px;}
+.pf-avatar-edit{position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;border-radius:50%;
+  background:var(--leaf);color:#0a0d0c;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  border:3px solid #0a100d;}
+.pf-handle{font-family:'Manrope',sans-serif;font-weight:800;font-size:20px;color:var(--text);}
+.pf-meta{font-size:12px;color:var(--text-faint);margin-top:4px;min-height:2px;}
+.pf-bio-view{font-size:14px;color:var(--text-dim);line-height:1.45;margin-top:10px;white-space:pre-wrap;word-break:break-word;}
+.pf-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.pf-chips-view{justify-content:center;margin-top:12px;}
+.pf-chips-view:empty{display:none;}
+.pf-chip{padding:8px 12px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--text-dim);font-family:inherit;}
+.pf-chip.on{background:rgba(217,255,79,0.14);border-color:rgba(217,255,79,0.45);color:var(--leaf);}
+.pf-chip.small{padding:4px 10px;font-size:11px;cursor:default;}
+.pf-input{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;font-size:15px;font-family:inherit;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--text);outline:none;resize:none;}
+.pf-input:focus{border-color:rgba(217,255,79,0.5);}
+.pf-at-wrap{position:relative;}
+.pf-at-wrap span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:15px;}
+.pf-at{padding-left:30px;}
+.pf-hint{font-size:11px;color:var(--text-faint);margin-top:6px;padding:0 2px;}
+.pf-hint.err{color:#ff4a3a;}
+.pf-opt{font-weight:600;letter-spacing:0.5px;text-transform:none;color:var(--text-faint);opacity:0.7;margin-left:4px;}
+.pf-seg{display:flex;gap:6px;flex-wrap:wrap;}
+.pf-seg-btn{flex:1;min-width:58px;padding:10px 6px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--text-dim);}
+.pf-seg-btn.on{background:var(--leaf);border-color:var(--leaf);color:#0a0d0c;}
+.pf-add-row{display:flex;gap:8px;margin-top:10px;}
+.pf-add{padding:0 18px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;
+  background:rgba(217,255,79,0.12);border:1px solid rgba(217,255,79,0.35);color:var(--leaf);}
 /* Toggle switch */
 .toggle-wrap{flex-shrink:0;}
 .toggle{
@@ -2386,11 +2432,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 @keyframes sideStripPulse{0%,100%{opacity:0.5;}50%{opacity:1;}}
 
 #border-controls{
-  position:fixed;bottom:env(safe-area-inset-bottom,16px);left:50%;
+  position:fixed;bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);left:50%;
   transform:translateX(-50%);z-index:560;
   display:none;gap:8px;width:min(94vw,420px);padding:0 12px;
 }
 #border-controls.active{display:flex;}
+/* Lift the GPS/Record buttons above the Sound / Exit Border bar so they don't cover it */
+body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bottom, 0px) + 84px);}
 #border-controls button{
   flex:1;padding:13px;border-radius:14px;font-weight:700;font-size:13px;
   background:#1c2622;color:var(--text);
@@ -2934,13 +2982,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
         <span class="bn-label">Squad</span>
       </button>
       <button class="bn-btn" id="bn-settings" onclick="openSettings()">
-        <span class="bn-ico">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-        </span>
-        <span class="bn-label">Settings</span>
+        <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        <span class="bn-label">Profile</span>
       </button>
     </div>
 
@@ -3042,14 +3085,15 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 <div id="onboard-panel">
   <div class="ob-card">
     <div class="ob-title">Welcome</div>
-    <div class="ob-sub">Set your name and photo so your crew can tell your tracking apart on shared maps.</div>
+    <div class="ob-sub" id="ob-sub">Pick a username and photo so your crew can tell your tracking apart on shared maps.</div>
     <div class="ob-avatar" id="ob-avatar-wrap" onclick="document.getElementById('ob-avatar-input').click()">
       <img id="ob-avatar-img" src=""/>
       <span id="ob-avatar-fallback" style="font-size:28px;">🌲</span>
     </div>
     <div class="ob-avatar-label">Tap to add a photo (optional)</div>
-    <input type="text" id="ob-name" class="ob-input" placeholder="Your name" autocomplete="off"/>
-    <button class="ob-continue" onclick="completeOnboarding()">Get Started</button>
+    <input type="text" id="ob-name" class="ob-input" placeholder="Username" maxlength="21" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"/>
+    <div id="ob-name-hint" style="font-size:11px;color:var(--text-faint);margin:-8px 0 14px;">3–20 letters, numbers, _ or .</div>
+    <button class="ob-continue" id="ob-continue" onclick="completeOnboarding()">Get Started</button>
     <input type="file" id="ob-avatar-input" accept="image/*" style="display:none" onchange="onOnboardAvatarPicked(this.files[0])"/>
   </div>
 </div>
@@ -3081,8 +3125,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
         <button onclick="uiSquadCancelForm()" style="width:100%;padding:11px;border-radius:12px;background:transparent;border:none;color:var(--text-faint);font-weight:600;font-size:13px;">Cancel</button>
       </div>
       <div id="sq-join-form" style="display:none;">
-        <label style="font-size:11px;color:var(--text-faint);letter-spacing:0.4px;">SQUAD CODE</label>
-        <input type="text" id="sq-joincode" placeholder="e.g. QHQ4F" style="width:100%;margin-top:6px;margin-bottom:8px;padding:12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-size:15px;text-transform:uppercase;"/>
+        <label style="font-size:11px;color:var(--text-faint);letter-spacing:0.4px;">INVITE LINK OR CODE</label>
+        <input type="text" id="sq-joincode" placeholder="Paste the link, or e.g. QHQ4F" style="width:100%;margin-top:6px;margin-bottom:8px;padding:12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-size:15px;text-transform:uppercase;"/>
         <button onclick="uiSquadJoinSubmit()" style="width:100%;padding:13px;border-radius:12px;background:rgba(217,255,79,0.14);border:1px solid rgba(217,255,79,0.35);color:var(--leaf);font-weight:700;font-size:14px;margin-bottom:8px;">Join</button>
         <button onclick="uiSquadCancelForm()" style="width:100%;padding:11px;border-radius:12px;background:transparent;border:none;color:var(--text-faint);font-weight:600;font-size:13px;">Cancel</button>
       </div>
@@ -3099,12 +3143,16 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
         </div>
         <button id="sq-add-photo-prompt" onclick="pickSquadImage()" style="display:none;padding:7px 14px;border-radius:10px;background:rgba(217,255,79,0.12);border:1px solid rgba(217,255,79,0.3);color:var(--leaf);font-size:11px;font-weight:700;">Add a group photo</button>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.08);">
-        <div>
-          <div style="font-size:10px;color:var(--text-faint);letter-spacing:0.5px;">SQUAD CODE</div>
-          <div id="sq-code" style="font-family:monospace;font-size:18px;color:var(--leaf);letter-spacing:1px;"></div>
+      <div style="padding:12px 0 14px;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="font-size:10px;color:var(--text-faint);letter-spacing:0.5px;margin-bottom:8px;">INVITE YOUR CREW</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="uiSquadInviteWhatsApp()" class="sq-inv-btn sq-inv-wa">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.75-.72 2-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.05 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.4 9.4 0 1 1 7.97 4.41zm8-17.43A11.3 11.3 0 0 0 12.04.75C5.8.75.73 5.82.73 12.06c0 2 .52 3.94 1.51 5.65L.64 23.25l5.68-1.49a11.3 11.3 0 0 0 5.72 1.46h.01c6.24 0 11.31-5.07 11.31-11.31 0-3.02-1.18-5.86-3.31-8z"/></svg>
+            WhatsApp</button>
+          <button onclick="uiSquadInviteShare()" class="sq-inv-btn">Share…</button>
+          <button onclick="uiSquadCopy()" class="sq-inv-btn">Copy link</button>
         </div>
-        <button onclick="uiSquadCopy()" style="padding:9px 14px;border-radius:10px;background:rgba(255,255,255,0.08);color:var(--text);font-size:12px;font-weight:700;">Copy</button>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">Code <span id="sq-code" style="font-family:monospace;color:var(--leaf);letter-spacing:1px;"></span> · they can also type this in Join</div>
       </div>
       <p style="font-size:11px;color:var(--text-faint);text-align:center;margin:10px 0 0;">Open any map below to see everyone's tracks on it — colour-coded, with pins for who's where. Tap a track for details.</p>
 
@@ -3460,6 +3508,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   animateLoadingProgress();
   checkOnboarding();
   initBasemap();
+  initInviteLinks();
+  setTimeout(verifyUsernameOnline, 2500);
   renderRecents();
   hookGestures();
   installToolTapHandlers();
@@ -5837,7 +5887,8 @@ function drawLineGuideOnLeaflet() {
 
 function startBorderModeFromMenu() {
   hideToolMenu();
-  if (!APP.fwd) { toast('Load a georeferenced PDF first', 'err'); return; }
+  // Works on a GeoPDF or the basemap — zones are GPS coordinates either way
+  if (!APP.fwd && APP.mode !== 'basemap') { toast('Open a map first', 'err'); return; }
   if (APP.gps.lat == null) { toast('Turn GPS on first', 'err'); return; }
   // Show mode picker sheet
   document.getElementById('border-mode-sheet-backdrop').classList.add('show');
@@ -6416,6 +6467,11 @@ function installToolTapHandlers() {
       }
       const pinHit = hitTestPlainPin(e.clientX, e.clientY);
       if (pinHit) { cleanupPtr(); editPlainPin(pinHit); return; }
+      if (hitTestMeasureLine(e.clientX, e.clientY) && typeof openLCS === 'function') {
+        cleanupPtr();
+        openLCS({ type: 'measure', colour: TOOL.measureColour || '#d9ff4f' });
+        return;
+      }
       const sk = hitTestSketch(e.clientX, e.clientY);
       if (sk !== null && typeof openLCS === 'function') {
         cleanupPtr();
@@ -6494,6 +6550,26 @@ function hitTestSketch(clientX, clientY) {
     }
   }
   return best;
+}
+
+/* Tap near the measure line on the GeoPDF? (same pixel test as sketches) */
+function hitTestMeasureLine(clientX, clientY) {
+  const pts = TOOL.measurePts;
+  if (!pts || pts.length < 2 || !APP.fwd) return false;
+  const canvas = document.getElementById('pdf-canvas');
+  if (!canvas) return false;
+  const rect = canvas.getBoundingClientRect();
+  const lx = (clientX - rect.left) * (canvas.width / rect.width);
+  const ly = (clientY - rect.top) * (canvas.height / rect.height);
+  const tol = Math.max(10, Math.min(200, 24 / Math.max(APP.view.scale || 1, 0.001)));
+  let prev = null;
+  for (const p of pts) {
+    const pg = latLngToPage(p.lat, p.lng);
+    const x = pg.x * APP.renderScale, y = (APP.pageH - pg.y) * APP.renderScale;
+    if (prev && distToSegmentPx(lx, ly, prev[0], prev[1], x, y) < tol) return true;
+    prev = [x, y];
+  }
+  return false;
 }
 
 function hitTestCompartment(clientX, clientY) {
@@ -8404,6 +8480,182 @@ function openSettings() {
   const s = document.getElementById('settings-screen');
   s.classList.add('show');
   setActiveNav('settings');
+  renderProfile();
+}
+
+/* =========================================================
+   PROFILE — username, photo, bio, experience, tickets.
+   Stored on the phone; username + photo also go to your squad.
+   ========================================================= */
+const PROFILE_TICKETS = [
+  'CS30/31 Chainsaw', 'CS32 Larger trees', 'CS38 Climbing & rescue', 'CS39 Aerial cutting',
+  'Brushcutter / clearing saw', 'Forwarder', 'Harvester', 'ATV / quad',
+  'Emergency First Aid +F', 'PA1 / PA6 Pesticides', 'Tree planting', 'Fencing'
+];
+const PROFILE_EXP = ['<1 yr', '1–3 yrs', '3–5 yrs', '5–10 yrs', '10+ yrs'];
+function cleanUsername(v) { return String(v || '').trim().replace(/^@+/, '').replace(/\s+/g, '_'); }
+function usernameError(n) {
+  if (!n) return 'Pick a username';
+  if (n.length < 3) return 'Username needs at least 3 characters';
+  if (n.length > 20) return 'Username can be 20 characters at most';
+  if (!/^[A-Za-z0-9_.]+$/.test(n)) return 'Use only letters, numbers, _ or .';
+  return '';
+}
+/* Usernames are unique across everyone — claimed on the server
+   (claim_username in Supabase). Returns 'ok' | 'taken' | 'invalid' | 'offline'. */
+async function claimUsername(name) {
+  try {
+    if (typeof supabase === 'undefined' || !navigator.onLine) return 'offline';
+    if (!sb) { try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { return 'offline'; } }
+    const { data, error } = await sb.rpc('claim_username', { p_username: name, p_device: getDeviceId() });
+    if (error) { console.warn('claim_username', error); return 'offline'; }
+    return data === 'ok' || data === 'taken' || data === 'invalid' ? data : 'offline';
+  } catch (e) { console.warn(e); return 'offline'; }
+}
+function markUsernameClaimed(name) {
+  try { localStorage.setItem('fft.usernameClaimed', name); localStorage.removeItem('fft.usernameUnverified'); } catch (e) {}
+}
+/* Confirm a username that was picked offline (or set before usernames were
+   unique). If someone else already has it, ask for a new one. */
+let _verifyingName = false;
+async function verifyUsernameOnline() {
+  const name = getMemberName();
+  if (!name || _verifyingName) return;
+  let claimed = ''; try { claimed = localStorage.getItem('fft.usernameClaimed') || ''; } catch (e) {}
+  if (claimed === name) return;
+  _verifyingName = true;
+  try {
+    const r = await claimUsername(name);
+    if (r === 'ok') { markUsernameClaimed(name); return; }
+    if (r === 'taken' || r === 'invalid') {
+      try { localStorage.setItem('fft.usernameUnverified', '1'); } catch (e) {}
+      showUsernamePicker(r === 'taken'
+        ? 'Someone already has @' + name + ' — pick another username.'
+        : 'Usernames can only use letters, numbers, _ or . — pick a new one.', name);
+    }
+  } finally { _verifyingName = false; }
+}
+function showUsernamePicker(message, prefill) {
+  document.getElementById('ob-sub').textContent = message;
+  document.getElementById('ob-name').value = prefill || '';
+  document.getElementById('onboard-panel').classList.add('show');
+  setTimeout(() => { try { document.getElementById('ob-name').focus(); } catch (e) {} }, 300);
+}
+window.addEventListener('online', () => setTimeout(verifyUsernameOnline, 1500));
+
+function getProfile() {
+  try { const p = JSON.parse(localStorage.getItem('fft.profile') || '{}'); return { bio: p.bio || '', exp: p.exp || '', tickets: Array.isArray(p.tickets) ? p.tickets : [] }; }
+  catch (e) { return { bio: '', exp: '', tickets: [] }; }
+}
+function setProfile(p) {
+  try { localStorage.setItem('fft.profile', JSON.stringify(p)); } catch (e) { warnIfStorageFull(e); }
+  flashProfileSaved();
+}
+function getLocalAvatar() { try { return localStorage.getItem('fft.avatarData') || ''; } catch (e) { return ''; } }
+function myAvatarSrc() { return getLocalAvatar() || getMyAvatarUrl() || ''; }
+function dataUrlToBlobSafe(d) {
+  const [head, b64] = d.split(','); const mime = (head.match(/:(.*?);/) || [])[1] || 'image/jpeg';
+  const bin = atob(b64); const arr = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+/* Keep a small copy of the photo on the phone (works offline), then upload it
+   for the squad in the background when there's signal. */
+async function setMyAvatarFromFile(file) {
+  const data = await compressPhoto(file, 256);
+  if (!data) return null;
+  try { localStorage.setItem('fft.avatarData', data); } catch (e) { warnIfStorageFull(e); }
+  (async () => {
+    try {
+      if (typeof supabase === 'undefined' || !sbReady()) return;
+      const url = await uploadToSquadMedia('avatars/device-' + getDeviceId() + '-' + Date.now() + '.jpg', dataUrlToBlobSafe(data));
+      if (!url) return;
+      setMyAvatarUrl(url);
+      const sq = getSquad(); if (sq) await squadUpsertMember(sq.id, getMemberName(), url);
+    } catch (e) { console.warn('avatar upload failed', e); }
+  })();
+  return data;
+}
+async function onProfileAvatarPicked(file) {
+  document.getElementById('pf-avatar-input').value = '';
+  if (!file) return;
+  const data = await setMyAvatarFromFile(file);
+  if (!data) { toast('Could not read that photo', 'err'); return; }
+  renderProfile(); flashProfileSaved();
+}
+let _pfSavedTimer = null;
+function flashProfileSaved() {
+  const el = document.getElementById('pf-saved'); if (!el) return;
+  el.classList.add('show'); clearTimeout(_pfSavedTimer);
+  _pfSavedTimer = setTimeout(() => el.classList.remove('show'), 1400);
+}
+function renderProfileCard() {
+  const name = getMemberName(), p = getProfile(), av = myAvatarSrc();
+  const img = document.getElementById('pf-avatar-img'), fb = document.getElementById('pf-avatar-fallback');
+  if (av) { img.src = av; img.style.display = 'block'; fb.style.display = 'none'; } else { img.style.display = 'none'; fb.style.display = ''; }
+  document.getElementById('pf-handle').textContent = name ? '@' + name : 'Set a username';
+  const sq = getSquad();
+  document.getElementById('pf-meta').textContent = [p.exp ? p.exp + ' experience' : '', sq ? 'Squad: ' + sq.name : ''].filter(Boolean).join(' · ');
+  const bv = document.getElementById('pf-bio-view'); bv.textContent = p.bio; bv.style.display = p.bio ? '' : 'none';
+  document.getElementById('pf-chips-view').innerHTML = p.tickets.map(t => '<span class="pf-chip on small">' + esc(t) + '</span>').join('');
+}
+function renderProfile() {
+  const p = getProfile();
+  const u = document.getElementById('pf-username');
+  if (document.activeElement !== u) u.value = getMemberName();
+  const bio = document.getElementById('pf-bio');
+  if (document.activeElement !== bio) bio.value = p.bio;
+  document.getElementById('pf-bio-count').textContent = (bio.value.length) + '/160';
+  document.getElementById('pf-exp').innerHTML = PROFILE_EXP.map(x =>
+    '<button class="pf-seg-btn' + (p.exp === x ? ' on' : '') + '" onclick="toggleProfileExp(\'' + x + '\')">' + x + '</button>').join('');
+  const all = PROFILE_TICKETS.concat(p.tickets.filter(t => !PROFILE_TICKETS.includes(t)));
+  document.getElementById('pf-tickets').innerHTML = all.map((t, i) =>
+    '<button class="pf-chip' + (p.tickets.includes(t) ? ' on' : '') + '" data-i="' + i + '">' + esc(t) + '</button>').join('');
+  document.querySelectorAll('#pf-tickets .pf-chip').forEach(btn => { btn.onclick = () => toggleProfileTicket(all[+btn.dataset.i]); });
+  renderProfileCard();
+}
+function toggleProfileExp(x) { const p = getProfile(); p.exp = p.exp === x ? '' : x; setProfile(p); renderProfile(); }
+function toggleProfileTicket(t) {
+  const p = getProfile();
+  p.tickets = p.tickets.includes(t) ? p.tickets.filter(x => x !== t) : p.tickets.concat([t]);
+  setProfile(p); renderProfile();
+}
+function addCustomTicket() {
+  const inp = document.getElementById('pf-ticket-custom');
+  const t = (inp.value || '').trim();
+  if (!t) return;
+  const p = getProfile();
+  if (!p.tickets.includes(t)) { p.tickets.push(t); setProfile(p); }
+  inp.value = ''; renderProfile();
+}
+let _pfInputTimer = null;
+function onProfileInput() {
+  const bio = document.getElementById('pf-bio');
+  document.getElementById('pf-bio-count').textContent = bio.value.length + '/160';
+  clearTimeout(_pfInputTimer);
+  _pfInputTimer = setTimeout(saveProfileText, 700);
+}
+async function saveProfileText() {
+  const p = getProfile();
+  const bio = document.getElementById('pf-bio').value.trim().slice(0, 160);
+  if (bio !== p.bio) { p.bio = bio; setProfile(p); }
+  const name = cleanUsername(document.getElementById('pf-username').value);
+  const hint = document.getElementById('pf-username-hint');
+  const err = usernameError(name);
+  const setHint = (t, bad) => { hint.textContent = t; hint.classList.toggle('err', !!bad); };
+  if (err) { setHint(err, true); renderProfileCard(); return; }
+  if (name === getMemberName()) { setHint('3–20 letters, numbers, _ or .', false); renderProfileCard(); return; }
+  setHint('Checking @' + name + '…', false);
+  const r = await claimUsername(name);
+  if (cleanUsername(document.getElementById('pf-username').value) !== name) return;   // they kept typing
+  if (r === 'taken') { setHint('@' + name + ' is taken — try another', true); return; }
+  if (r === 'invalid') { setHint('Use 3–20 letters, numbers, _ or .', true); return; }
+  if (r === 'offline') { setHint('No signal — can\'t check usernames right now. Still @' + getMemberName() + '.', true); return; }
+  markUsernameClaimed(name);
+  setMemberName(name); flashProfileSaved();
+  setHint('@' + name + ' is yours ✓', false);
+  const sq = getSquad();
+  if (sq && typeof sbReady === 'function' && sbReady()) squadUpsertMember(sq.id, name, getMyAvatarUrl());
+  renderProfileCard();
 }
 
 function closeSettings() {
@@ -8659,21 +8911,34 @@ function checkOnboarding() {
 async function onOnboardAvatarPicked(file) {
   document.getElementById('ob-avatar-input').value = '';
   if (!file) return;
-  toast('Uploading photo…', 'info');
-  const path = 'avatars/device-' + getDeviceId() + '.jpg';
-  const url = await uploadToSquadMedia(path, file);
-  if (!url) { toast('Upload failed', 'err'); return; }
-  setMyAvatarUrl(url);
+  const data = await setMyAvatarFromFile(file);
+  if (!data) { toast('Could not read that photo', 'err'); return; }
   const img = document.getElementById('ob-avatar-img');
   const fb = document.getElementById('ob-avatar-fallback');
-  img.src = url; img.style.display = ''; fb.style.display = 'none';
+  img.src = data; img.style.display = ''; fb.style.display = 'none';
   toast('Photo added', 'ok');
 }
-function completeOnboarding() {
-  const name = document.getElementById('ob-name').value.trim();
-  if (!name) { toast('Enter your name first', 'info'); return; }
+async function completeOnboarding() {
+  const btn = document.getElementById('ob-continue');
+  if (btn.disabled) return;
+  const name = cleanUsername(document.getElementById('ob-name').value);
+  const err = usernameError(name);
+  const hint = document.getElementById('ob-name-hint');
+  if (err) { hint.textContent = err; hint.style.color = '#ff4a3a'; return; }
+  btn.disabled = true; const label = btn.textContent; btn.textContent = 'Checking…';
+  let r;
+  try { r = await claimUsername(name); } finally { btn.disabled = false; btn.textContent = label; }
+  if (r === 'taken') { hint.textContent = '@' + name + ' is taken — try another'; hint.style.color = '#ff4a3a'; return; }
+  if (r === 'invalid') { hint.textContent = 'Use 3–20 letters, numbers, _ or .'; hint.style.color = '#ff4a3a'; return; }
+  hint.textContent = '3–20 letters, numbers, _ or .'; hint.style.color = '';
+  if (r === 'ok') markUsernameClaimed(name);
+  else { try { localStorage.setItem('fft.usernameUnverified', '1'); } catch (e) {} toast('No signal — your username will be confirmed when you\'re back online', 'info'); }
   setMemberName(name);
+  // Keep the squad entry in step if they were renaming
+  const sqNow = getSquad();
+  if (sqNow && r === 'ok' && typeof sbReady === 'function' && sbReady()) squadUpsertMember(sqNow.id, name, getMyAvatarUrl());
   document.getElementById('onboard-panel').classList.remove('show');
+  checkPendingInvite();
 }
 
 let squadPollTimer = null;
@@ -8753,16 +9018,10 @@ function pickAvatar() { document.getElementById('sq-avatar-input').click(); }
 async function onAvatarPicked(file) {
   document.getElementById('sq-avatar-input').value = '';
   if (!file) return;
-  const sq = getSquad();
-  if (!sq) return;
-  toast('Uploading photo…', 'info');
-  const path = 'avatars/' + sq.id + '-' + getDeviceId() + '.jpg';
-  const url = await uploadToSquadMedia(path, file);
-  if (!url) { toast('Upload failed', 'err'); return; }
-  setMyAvatarUrl(url);
-  await squadUpsertMember(sq.id, getMemberName(), url);
-  renderSquadPanel();
+  const data = await setMyAvatarFromFile(file);
+  if (!data) { toast('Could not read that photo', 'err'); return; }
   toast('Photo updated', 'ok');
+  setTimeout(() => { if (document.getElementById('squad-panel').classList.contains('show')) renderSquadPanel(); }, 2500);
 }
 
 function pickSquadImage() {
@@ -9448,21 +9707,96 @@ function uiSquadCreateSubmit() {
 function uiSquadJoinSubmit() {
   const name = getMemberName();
   if (!name) { toast('Set your name first', 'info'); checkOnboarding(); return; }
-  const code = document.getElementById('sq-joincode').value.trim();
-  if (!code) { toast('Enter a squad code', 'info'); return; }
+  const code = extractSquadCode(document.getElementById('sq-joincode').value);
+  if (!code) { toast('Paste the invite link or enter the squad code', 'info'); return; }
   squadJoin(code, name);
 }
+/* =========================================================
+   SQUAD INVITES — shareable links instead of codes.
+   Link → small invite page on GitHub Pages (join.html), which opens the
+   app via fft://join?code=… or falls back to the web version.
+   ========================================================= */
+const INVITE_PAGE = 'https://sillysalmon77.github.io/fft-app/join.html';
+function squadInviteUrl(sq) {
+  return INVITE_PAGE + '?c=' + encodeURIComponent(sq.code) + '&n=' + encodeURIComponent(sq.name || '');
+}
+function squadInviteText(sq) {
+  return 'Join my squad "' + sq.name + '" on Forestry Field Tracker: ' + squadInviteUrl(sq);
+}
+function openExternal(url) {
+  // In the Android app, navigating to an outside link hands it to the right app (WhatsApp etc.)
+  if (isNativeApp()) location.href = url; else window.open(url, '_blank');
+}
+function uiSquadInviteWhatsApp() {
+  const sq = getSquad(); if (!sq) return;
+  openExternal('https://wa.me/?text=' + encodeURIComponent(squadInviteText(sq)));
+}
+async function uiSquadInviteShare() {
+  const sq = getSquad(); if (!sq) return;
+  const payload = { title: 'Join ' + sq.name, text: 'Join my squad "' + sq.name + '" on Forestry Field Tracker', url: squadInviteUrl(sq), dialogTitle: 'Invite to ' + sq.name };
+  try {
+    if (isNativeApp() && window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('Share')) {
+      await window.Capacitor.registerPlugin('Share').share(payload); return;
+    }
+    if (navigator.share) { await navigator.share(payload); return; }
+  } catch (e) { if (e && /cancel|abort/i.test(e.message || e.name || '')) return; console.warn(e); }
+  uiSquadCopy();
+}
+function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+  return new Promise((res, rej) => {
+    try {
+      const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); ok ? res() : rej();
+    } catch (e) { rej(e); }
+  });
+}
 function uiSquadCopy() {
-  const sq = getSquad();
-  if (!sq) return;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(sq.code).then(() => toast('Code copied', 'ok')).catch(() => toast(sq.code, 'info'));
-  } else {
-    toast(sq.code, 'info');
+  const sq = getSquad(); if (!sq) return;
+  copyText(squadInviteText(sq)).then(() => toast('Invite link copied', 'ok')).catch(() => toast(squadInviteUrl(sq), 'info'));
+}
+/* Pull a squad code out of whatever was pasted or opened: a code, an invite link, or fft://join?code= */
+function extractSquadCode(v) {
+  v = String(v || '').trim();
+  const m = v.match(/[?&](?:c|code|join)=([A-Za-z0-9]{4,8})/);
+  if (m) return m[1].toUpperCase();
+  const bare = v.replace(/\s+/g, '');
+  return /^[A-Za-z0-9]{4,8}$/.test(bare) ? bare.toUpperCase() : '';
+}
+function handleInviteCode(code) {
+  if (!code) return;
+  if (!getMemberName()) {   // join right after they pick a username
+    try { localStorage.setItem('fft.pendingJoin', code); } catch (e) {}
+    checkOnboarding(); return;
+  }
+  const cur = getSquad();
+  if (cur && cur.code === code) { openSquad(); toast('You\'re already in ' + cur.name, 'info'); return; }
+  if (cur) { openSquad(); toast('Leave ' + cur.name + ' first to join another squad', 'info'); return; }
+  openSquad();
+  showConfirm('Join squad?', 'You\'ve been invited to a squad (code ' + code + ').', '', 'JOIN', () => squadJoin(code, getMemberName()));
+}
+function handleInviteUrl(url) { handleInviteCode(extractSquadCode(url)); }
+function checkPendingInvite() {
+  let code = '';
+  try { code = localStorage.getItem('fft.pendingJoin') || ''; localStorage.removeItem('fft.pendingJoin'); } catch (e) {}
+  if (code) setTimeout(() => handleInviteCode(code), 400);
+}
+/* Startup: web (?join= / ?c=) or the Android app opened from a link */
+function initInviteLinks() {
+  const q = new URLSearchParams(location.search);
+  const webCode = extractSquadCode('?c=' + (q.get('join') || q.get('c') || ''));
+  if (webCode) {
+    try { history.replaceState({}, '', location.pathname); } catch (e) {}
+    setTimeout(() => handleInviteCode(webCode), 800);
+  }
+  if (isNativeApp() && window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('App')) {
+    const AppPlugin = window.Capacitor.registerPlugin('App');
+    try { AppPlugin.addListener('appUrlOpen', ev => handleInviteUrl(ev && ev.url)); } catch (e) { console.warn(e); }
+    try { AppPlugin.getLaunchUrl().then(r => { if (r && r.url) setTimeout(() => handleInviteUrl(r.url), 800); }).catch(() => {}); } catch (e) {}
   }
 }
 function uiSquadLeave() {
-  showConfirm('Leave squad?', 'You can rejoin any time with the squad code.', '', 'LEAVE', squadLeaveNow);
+  showConfirm('Leave squad?', 'You can rejoin any time with an invite link.', '', 'LEAVE', squadLeaveNow);
 }
 
 /* =========================================================
@@ -9487,11 +9821,50 @@ window.addEventListener('resize', () => {
      ========================================================= -->
 <div id="settings-screen">
   <div class="settings-header">
-    <div class="settings-title">SETTINGS</div>
+    <div class="settings-title">PROFILE</div>
+    <div id="pf-saved" class="pf-saved">Saved ✓</div>
   </div>
   <div class="settings-body">
+    <div class="pf-card">
+      <div class="pf-avatar" onclick="document.getElementById('pf-avatar-input').click()">
+        <img id="pf-avatar-img" alt=""/>
+        <span id="pf-avatar-fallback">🌲</span>
+        <div class="pf-avatar-edit">✎</div>
+      </div>
+      <div class="pf-handle" id="pf-handle">@username</div>
+      <div class="pf-meta" id="pf-meta"></div>
+      <div class="pf-bio-view" id="pf-bio-view"></div>
+      <div class="pf-chips pf-chips-view" id="pf-chips-view"></div>
+    </div>
+
     <div class="settings-section">
-      <div class="settings-section-label">About</div>
+      <div class="settings-section-label">Username</div>
+      <div class="pf-at-wrap"><span>@</span><input id="pf-username" class="pf-input pf-at" maxlength="21" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="onProfileInput()"/></div>
+      <div class="pf-hint" id="pf-username-hint">3–20 letters, numbers, _ or .</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Bio</div>
+      <textarea id="pf-bio" class="pf-input" maxlength="160" rows="3" placeholder="e.g. Planting and fencing across Ayrshire and Argyll" oninput="onProfileInput()"></textarea>
+      <div class="pf-hint" id="pf-bio-count" style="text-align:right;">0/160</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Experience <span class="pf-opt">optional</span></div>
+      <div class="pf-seg" id="pf-exp"></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Tickets &amp; competences <span class="pf-opt">optional</span></div>
+      <div class="pf-chips" id="pf-tickets"></div>
+      <div class="pf-add-row">
+        <input id="pf-ticket-custom" class="pf-input" maxlength="30" placeholder="Add another…" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTicket();}"/>
+        <button class="pf-add" onclick="addCustomTicket()">Add</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Settings</div>
       <div class="settings-row">
         <div class="settings-row-text">
           <div class="settings-row-title">Forestry Field Tracker</div>
@@ -9500,6 +9873,7 @@ window.addEventListener('resize', () => {
       </div>
     </div>
   </div>
+  <input type="file" id="pf-avatar-input" accept="image/*" style="display:none" onchange="onProfileAvatarPicked(this.files[0])"/>
   <!-- Bottom nav repeated for settings screen -->
   <div class="bottom-nav" style="position:absolute;bottom:0;left:0;right:0;">
     <button class="bn-btn" id="bn-home-s" onclick="bnHome()">
@@ -9515,8 +9889,8 @@ window.addEventListener('resize', () => {
       <span class="bn-label">Squad</span>
     </button>
     <button class="bn-btn active" id="bn-settings-s" onclick="openSettings()">
-      <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-      <span class="bn-label">Settings</span>
+      <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <span class="bn-label">Profile</span>
     </button>
   </div>
 </div>
@@ -9907,7 +10281,7 @@ window.addEventListener('resize', () => {
 <!-- ── LAYER CONTEXT SHEET ─────────────────────────────── -->
 <div id="lcs-overlay" style="display:none;position:fixed;inset:0;z-index:8998;" onclick="closeLCS()"></div>
 <div id="lcs-sheet" style="
-  position:fixed;bottom:-260px;left:0;right:0;
+  position:fixed;bottom:-360px;left:0;right:0;
   background:#141a18;
   border-top:2px solid rgba(217,255,79,0.4);
   border-radius:20px 20px 0 0;
@@ -9917,7 +10291,8 @@ window.addEventListener('resize', () => {
   box-shadow:0 -8px 32px rgba(0,0,0,0.6);
 ">
   <div style="width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 14px;"></div>
-  <div id="lcs-title" style="font-size:11px;letter-spacing:2px;color:#6c7a70;text-transform:uppercase;margin-bottom:12px;font-family:'Inter',sans-serif;"></div>
+  <div id="lcs-title" style="font-size:11px;letter-spacing:2px;color:#6c7a70;text-transform:uppercase;margin-bottom:4px;font-family:'Inter',sans-serif;"></div>
+  <div id="lcs-value" style="font-family:'Manrope',sans-serif;font-size:26px;font-weight:800;color:#d9ff4f;margin-bottom:14px;"></div>
   <div id="lcs-swatches" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;"></div>
   <div style="display:flex;gap:10px;">
     <button id="lcs-delete" onclick="lcsDelete()" style="
@@ -9973,6 +10348,20 @@ window.addEventListener('resize', () => {
     _lcsTarget = target;
     const labels = { measure:'Measure Line', sketch:'Sketch', area:'Area Polygon' };
     title.textContent = labels[target.type] || 'Layer';
+    // Show the measurement itself — length for lines/sketches, area + perimeter for areas
+    const valEl = document.getElementById('lcs-value');
+    const lineLen = pts => { let d = 0; for (let i = 1; i < (pts || []).length; i++) d += haversine(pts[i-1].lat, pts[i-1].lng, pts[i].lat, pts[i].lng); return d; };
+    let val = '';
+    try {
+      if (target.type === 'measure') val = fmtDist(lineLen(TOOL.measurePts));
+      else if (target.type === 'sketch') val = fmtDist(lineLen(TOOL.sketchPaths[target.index]));
+      else if (target.type === 'area' && TOOL.areaPts && TOOL.areaPts.length >= 3) {
+        const ring = TOOL.areaPts.concat([TOOL.areaPts[0]]);
+        val = fmtArea(polyArea(TOOL.areaPts)) + '<span style="font-size:14px;color:#9ba89e;font-weight:600;"> · ' + fmtDist(lineLen(ring)) + ' perimeter</span>';
+      }
+    } catch (e) { console.warn(e); }
+    valEl.innerHTML = val;
+    valEl.style.display = val ? 'block' : 'none';
     updateSwatches(target.colour || '#d9ff4f');
     swatches.style.display = target.type === 'area' ? 'none' : 'flex';
     overlay.style.display = 'block';
@@ -9980,7 +10369,7 @@ window.addEventListener('resize', () => {
   };
 
   window.closeLCS = function() {
-    sheet.style.bottom = '-260px';
+    sheet.style.bottom = '-360px';
     overlay.style.display = 'none';
     _lcsTarget = null;
   };
