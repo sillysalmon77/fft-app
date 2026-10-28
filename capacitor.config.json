@@ -1,0 +1,8 @@
+{
+  "appId": "uk.scotapps.fft",
+  "appName": "Forestry Field Tracker",
+  "webDir": "www",
+  "android": {
+    "useLegacyBridge": true
+  }
+}
