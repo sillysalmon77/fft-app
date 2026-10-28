@@ -853,8 +853,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
    READOUT — live measurement display
    ========================================================= */
 #readout{
-  position:absolute;left:14px;right:14px;
-  bottom:calc(env(safe-area-inset-bottom, 0px) + 140px);
+  position:absolute;left:12px;right:12px;
+  top:calc(max(env(safe-area-inset-top, 10px), 10px) + 62px);
   z-index:20;display:none;
   background:rgba(26,40,32,0.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border:1px solid var(--border);border-radius:14px;
@@ -867,7 +867,9 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 /* When a tool is active, leave room on the right for the FAB column.
    FAB column is ~180px wide at its widest (PDF/GPS labelled capsules), so
    pull the readout in to avoid overlap. */
-#readout.with-fabs{right:200px;}
+/* While a tool is active the Tap/Draw toggle sits under the top bar, so drop
+   the readout below it instead of on top of it. */
+#readout.with-fabs{right:12px;top:calc(max(env(safe-area-inset-top, 10px), 10px) + 118px);white-space:normal;}
 #readout .ro-label{color:var(--text-faint);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-right:8px;font-weight:600;}
 #readout .ro-val{color:var(--leaf);font-weight:700;font-size:16px;}
 #readout .ro-sep{color:var(--text-faint);margin:0 8px;}
@@ -2710,7 +2712,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
         <div id="tm-comp-list" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
       </div>
       <!-- Clear buttons removed — tap any line/sketch/area on map to delete -->
-      <div class="tm-divider">SQUAD</div>
       <button class="tm-btn" id="tm-squad-send" onclick="sendToSquad()">
         <span>Send to squad</span>
         <span class="tm-ico">
@@ -2720,7 +2721,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
           </svg>
         </span>
       </button>
-      <div class="tm-divider">ACCOUNT</div>
       <button class="tm-btn" id="tm-account" onclick="openAccountScreen()">
         <span id="tm-account-label">Account &amp; Team</span>
         <span class="tm-ico">
@@ -3347,7 +3347,7 @@ function saveMapState(name) {
       ts: Date.now()
     };
     localStorage.setItem(stateKey(name), JSON.stringify(state));
-  } catch (e) { console.warn('saveMapState failed', e); }
+  } catch (e) { console.warn('saveMapState failed', e); warnIfStorageFull(e); }
 }
 
 function clearMapState(name) {
@@ -3440,7 +3440,10 @@ const TRACK = {
   totalDist: 0,
 };
 
-const TRACK_MIN_MOVE_M = 1.5;        // ignore jitter under this
+const TRACK_MIN_MOVE_M = 5;          // minimum step between track points (raised to the GPS accuracy if worse)
+const TRACK_AVG_FIXES = 5;           // fixes averaged before deciding you've moved
+const TRACK_STILL_SPEED_MS = 0.35;   // GPS-reported speed below this = standing still (slow walk is ~0.8)
+const TRACK_MAX_SPEED_MS = 5;        // ~18 km/h — faster jumps between fixes are GPS spikes, not walking
 const TRACK_MAX_ACC_M = 30;          // skip fixes worse than this
 const TRACK_GATE_ACC_M = 15;         // require a fix at least this good to START a track
 
@@ -3526,6 +3529,7 @@ function initBasemap() {
   const LEAF_DT_WINDOW = 350, LEAF_DT_SLOP = 32;
 
   APP.leaf.on('click', e => {
+    if (APP._placingPin && !TOOL.active) { placePinAt(e.latlng.lat, e.latlng.lng); return; }
     if (TOOL.active && (TOOL.active === 'measure' || TOOL.active === 'area' || TOOL.active === 'calibrate' || TOOL.active === 'movePdf')
         && TOOL.inputMode === 'tap') {
       if (TOOL.active === 'movePdf' && APP._movePdfDragJustEnded) {
@@ -4188,7 +4192,8 @@ function getBgGeoPlugin() {
 }
 function bgLocationToPos(location) {
   return {
-    coords: { latitude: location.latitude, longitude: location.longitude, accuracy: location.accuracy },
+    coords: { latitude: location.latitude, longitude: location.longitude, accuracy: location.accuracy,
+              speed: (typeof location.speed === 'number') ? location.speed : null },
     timestamp: location.time || Date.now()
   };
 }
@@ -4346,6 +4351,9 @@ function stopGps() {
 function onGps(pos) {
   const lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy;
   const t = pos.timestamp || Date.now();
+  // Doppler speed (m/s) from the GPS chip, when available. Unlike position it
+  // doesn't wander when you stand still, so it's the best "am I moving" signal.
+  APP.gps.speed = (typeof pos.coords.speed === 'number' && !isNaN(pos.coords.speed)) ? pos.coords.speed : null;
   const warming = (Date.now() - APP.gps.startTime) < WARMUP_MS;
 
   // Reject junk fixes once we have a working lock — a sudden ±100m fix
@@ -4425,12 +4433,31 @@ function appendTrackFix(lat, lng, acc, t) {
   // Skip awful fixes — but always take the first one
   if (acc > TRACK_MAX_ACC_M && TRACK.pts.length > 0) return;
   const last = TRACK.pts[TRACK.pts.length - 1];
-  if (last) {
-    const d = haversine(last.lat, last.lng, lat, lng);
-    if (d < TRACK_MIN_MOVE_M) return;       // too close — skip jitter
-    TRACK.totalDist += d;
+  if (!last) {
+    TRACK._buf = [];
+    TRACK.pts.push({ lat, lng, t, acc });
+    redrawTrack(); updateTrackReadout(); scheduleSave();
+    return;
   }
-  TRACK.pts.push({ lat, lng, t, acc });
+  // Standing still per the GPS's own (Doppler) speed — ignore position wander
+  if (APP.gps.speed != null && APP.gps.speed < TRACK_STILL_SPEED_MS) { TRACK._buf = []; return; }
+  // Average the last few fixes, and only commit a new point once that average
+  // has moved further than the GPS noise. Tested against simulated drift:
+  // a fixed small step let wander add tens of metres of phantom track.
+  const buf = TRACK._buf || (TRACK._buf = []);
+  buf.push({ lat, lng, acc });
+  if (buf.length > TRACK_AVG_FIXES) buf.shift();
+  if (buf.length < 3) return;
+  let sLat = 0, sLng = 0, sAcc = 0;
+  buf.forEach(f => { sLat += f.lat; sLng += f.lng; sAcc += (f.acc || 0); });
+  const aLat = sLat / buf.length, aLng = sLng / buf.length, aAcc = sAcc / buf.length;
+  const d = haversine(last.lat, last.lng, aLat, aLng);
+  if (d < Math.max(TRACK_MIN_MOVE_M, aAcc)) return;
+  // Reject spikes: a jump needing you to move faster than TRACK_MAX_SPEED_MS
+  const dt = Math.max(1, ((t || Date.now()) - (last.t || 0)) / 1000);
+  if (d / dt > TRACK_MAX_SPEED_MS) return;
+  TRACK.totalDist += d;
+  TRACK.pts.push({ lat: aLat, lng: aLng, t, acc: aAcc });
   redrawTrack();
   updateTrackReadout();
   scheduleSave();
@@ -5254,8 +5281,29 @@ function dropWaypointPinFromMenu() {
   showPinLabelModal(pin);
 }
 
+const PIN_COLOURS = ['#d9ff4f', '#ffffff', '#ff4a3a', '#ff9900', '#00cfff', '#ff44cc'];
+function renderPinColourRow(active) {
+  const row = document.getElementById('pin-colour-row');
+  if (!row) return;
+  row.innerHTML = '';
+  PIN_COLOURS.forEach(hex => {
+    const sw = document.createElement('div');
+    const on = hex === active;
+    sw.style.cssText = 'width:32px;height:32px;border-radius:50%;cursor:pointer;background:' + hex +
+      ';border:2px solid ' + (on ? '#fff' : 'transparent') + ';transform:scale(' + (on ? 1.15 : 1) + ');transition:transform .1s;';
+    sw.onclick = () => { if (_pinLabelPending) { _pinLabelPending.pin.colour = hex; renderPinColourRow(hex); } };
+    row.appendChild(sw);
+  });
+}
 function showPinLabelModal(pin, editing) {
+  if (!pin.colour) pin.colour = PIN_COLOURS[0];
+  // Edit a copy so Cancel/Skip on an existing pin doesn't keep half-made changes
+  if (editing) pin = Object.assign({}, pin);
   _pinLabelPending = { pin, editing: !!editing };
+  document.getElementById('pin-modal-title').textContent = editing ? 'Edit pin' : 'New pin';
+  document.getElementById('pin-delete-btn').style.display = editing ? 'block' : 'none';
+  document.getElementById('pin-skip-btn').textContent = editing ? 'Cancel' : 'Skip';
+  renderPinColourRow(pin.colour);
   const input = document.getElementById('pin-label-input');
   if (input) input.value = pin.label || '';
   const coords = document.getElementById('pin-label-coords');
@@ -5299,6 +5347,77 @@ function confirmPinLabel() {
 }
 
 let _pinLabelPending = null;
+
+function deletePendingPin() {
+  if (!_pinLabelPending) return;
+  const id = _pinLabelPending.pin.id;
+  _pinLabelPending = null;
+  document.getElementById('pin-modal-backdrop').style.display = 'none';
+  deletePlainPin(id);
+}
+
+/* Place-a-pin mode: next tap on the map (GeoPDF or basemap) drops a pin there */
+function startPlacePin() {
+  if (!APP.pdf && !APP.leaf) { toast('Open a map first', 'err'); return; }
+  APP._placingPin = true;
+  toast('Tap the map where you want the pin', 'info');
+}
+function placePinAt(lat, lng) {
+  APP._placingPin = false;
+  haptic(15);
+  showPinLabelModal({ id: 'pin_' + Date.now(), lat, lng, ts: Date.now(), label: '', colour: PIN_COLOURS[0] });
+}
+
+/* Location pins on the GeoPDF canvas — they were only ever drawn on the
+   basemap before. Constant on-screen size; positions kept for tapping. */
+function drawPlainPinsOnPdf(ctx) {
+  APP._pdfPinHits = [];
+  if (!TOOL.plainPins || !TOOL.plainPins.length || !APP.fwd) return;
+  const scale = Math.max(APP.view.scale || 1, 0.001);
+  const r = Math.max(6, Math.min(60, 11 / scale));
+  TOOL.plainPins.forEach(pin => {
+    const pg = latLngToPage(pin.lat, pin.lng);
+    const x = pg.x * APP.renderScale, y = (APP.pageH - pg.y) * APP.renderScale;
+    const cy = y - r * 1.6;
+    const col = pin.colour || '#d9ff4f';
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, cy, r, Math.PI * 0.85, Math.PI * 0.15);
+    ctx.lineTo(x, y);
+    ctx.closePath();
+    ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = r * 0.5;
+    ctx.fillStyle = col; ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = r * 0.12; ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, cy, r * 0.38, 0, Math.PI * 2); ctx.fillStyle = '#0a1810'; ctx.fill();
+    if (pin.label) {
+      ctx.font = '700 ' + (r * 1.0) + 'px Inter, sans-serif';
+      const tw = ctx.measureText(pin.label).width, pad = r * 0.45, h = r * 1.5;
+      const bx = x - tw / 2 - pad, by = y + r * 0.35;
+      ctx.fillStyle = 'rgba(10,13,12,0.88)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(bx, by, tw + pad * 2, h, r * 0.4); else ctx.rect(bx, by, tw + pad * 2, h);
+      ctx.fill();
+      ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(pin.label, x, by + h / 2);
+    }
+    ctx.restore();
+    APP._pdfPinHits.push({ id: pin.id, x, y: cy, r: r * 1.8 });
+  });
+}
+function hitTestPlainPin(clientX, clientY) {
+  if (!APP._pdfPinHits || !APP._pdfPinHits.length) return null;
+  const canvas = document.getElementById('pdf-canvas');
+  if (!canvas) return null;
+  const rect = canvas.getBoundingClientRect();
+  const lx = (clientX - rect.left) * (canvas.width / rect.width);
+  const ly = (clientY - rect.top) * (canvas.height / rect.height);
+  for (let i = APP._pdfPinHits.length - 1; i >= 0; i--) {
+    const h = APP._pdfPinHits[i];
+    if (Math.hypot(lx - h.x, ly - h.y) <= h.r) return h.id;
+  }
+  return null;
+}
 
 function deletePlainPin(id) {
   if (!TOOL.plainPins) return;
@@ -6151,14 +6270,12 @@ function updateActionBar() {
 
   if (TOOL.active === 'snapPdf') {
     // One-shot tool: tap-to-snap-and-exit. Only Cancel makes sense.
-    drop.style.display = 'none';
     undo.style.display = 'none';
     done.style.display = 'none';
     return;
   }
 
   if (TOOL.active === 'movePdf') {
-    drop.style.display = 'none';
     undo.style.display = 'none';
     done.style.display = 'flex';
     const startShift = TOOL.movePdfStartShift || { dLat: 0, dLng: 0 };
@@ -6168,7 +6285,6 @@ function updateActionBar() {
   }
 
   if (TOOL.active === 'draw') {
-    drop.style.display = 'none';
     undo.style.display = 'flex';
     done.style.display = 'flex';
     undo.disabled = TOOL.sketchPaths.length === 0;
@@ -6216,6 +6332,12 @@ function installToolTapHandlers() {
 
     // No tool active — check if tapped a compartment, or a squad track, on PDF canvas
     if (!TOOL.active && APP.mode === 'pdf') {
+      if (APP._placingPin) {
+        const ll = clientToLatLng(e.clientX, e.clientY);
+        if (ll) { cleanupPtr(); placePinAt(ll.lat, ll.lng); return; }
+      }
+      const pinHit = hitTestPlainPin(e.clientX, e.clientY);
+      if (pinHit) { cleanupPtr(); editPlainPin(pinHit); return; }
       const sk = hitTestSketch(e.clientX, e.clientY);
       if (sk !== null && typeof openLCS === 'function') {
         cleanupPtr();
@@ -6618,31 +6740,61 @@ function deletePhotoPinById(id) {
   toast('Photo pin deleted', 'info');
 }
 
-function savePhotoPins() {
+/* Photo pins live in IndexedDB (alongside the stored PDFs), not localStorage.
+   localStorage is only ~5MB on Android and each photo is ~100-200KB, so a few
+   dozen photos used to fill it — after which every save failed silently,
+   including tracks and compartments. */
+function photoKey(name) { return '__photos__/' + name; }
+async function savePhotoPins() {
+  if (!APP.fileName) return;
+  const name = APP.fileName;
+  const toSave = PHOTO_PINS.items.map(({ id, lat, lng, dataUrl, ts, label }) => ({ id, lat, lng, dataUrl, ts, label }));
   try {
-    // Save without the Leaflet marker object
-    const toSave = PHOTO_PINS.items.map(({ id, lat, lng, dataUrl, ts, label }) =>
-      ({ id, lat, lng, dataUrl, ts, label })
-    );
-    if (!APP.fileName) return;
-    const key = 'fft.photos.' + APP.fileName;
-    localStorage.setItem(key, JSON.stringify(toSave));
-  } catch(e) { console.warn('savePhotoPins failed', e); }
+    const db = await openDB();
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put({ name: photoKey(name), buf: toSave, ts: Date.now() });
+    await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); });
+    try { localStorage.removeItem('fft.photos.' + name); } catch (_) {}
+  } catch (e) {
+    console.warn('savePhotoPins failed', e);
+    toast('Could not save photo pins — phone storage may be full', 'err');
+  }
 }
 
-function loadPhotoPins() {
+async function loadPhotoPins() {
   if (!APP.fileName) return;
+  const name = APP.fileName;
+  let items = null;
   try {
-    const key = 'fft.photos.' + APP.fileName;
-    const raw = localStorage.getItem(key);
-    if (!raw) return;
-    const items = JSON.parse(raw);
-    PHOTO_PINS.items = [];
-    items.forEach(pin => {
-      PHOTO_PINS.items.push(pin);
-      addPhotoPinMarker(pin);
-    });
-  } catch(e) { console.warn('loadPhotoPins failed', e); }
+    const db = await openDB();
+    const tx = db.transaction(DB_STORE, 'readonly');
+    const req = tx.objectStore(DB_STORE).get(photoKey(name));
+    const rec = await new Promise(res => { req.onsuccess = () => res(req.result); req.onerror = () => res(null); });
+    if (rec && Array.isArray(rec.buf)) items = rec.buf;
+  } catch (e) { console.warn('loadPhotoPins (db) failed', e); }
+  let migrated = false;
+  if (!items) {
+    // Older versions kept photos in localStorage — pick them up and move them
+    try {
+      const raw = localStorage.getItem('fft.photos.' + name);
+      if (raw) { items = JSON.parse(raw); migrated = true; }
+    } catch (e) { console.warn('loadPhotoPins (legacy) failed', e); }
+  }
+  if (!items || APP.fileName !== name) return;   // map changed while loading
+  PHOTO_PINS.items = [];
+  items.forEach(pin => { PHOTO_PINS.items.push(pin); addPhotoPinMarker(pin); });
+  if (migrated) savePhotoPins();
+  if (APP.mode === 'pdf') drawToolsOnPdf();
+}
+
+/* Shown once if the main map save hits the storage limit, so data loss is never silent */
+let _storageWarned = false;
+function warnIfStorageFull(e) {
+  if (_storageWarned) return;
+  if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''))) {
+    _storageWarned = true;
+    toast('Phone storage for FFT is full — your latest changes may not be saved', 'err');
+  }
 }
 
 
@@ -7115,6 +7267,7 @@ function drawToolsOnPdf() {
 
   // Photo pins — previously only drew on the basemap, missing on GeoPDF
   drawPhotoPinsOnPdf(ctx);
+  drawPlainPinsOnPdf(ctx);
 
   // Squad tracks/pins — drawn last so pins sit on top of everything else
   drawSquadOnPdf(ctx);
@@ -7308,23 +7461,24 @@ function drawToolsOnLeaflet() {
   APP._leafPlainPins = [];
   if (TOOL.plainPins && TOOL.plainPins.length) {
     TOOL.plainPins.forEach(pin => {
-      const pinLbl = pin.label || '';
+      const pinLbl = esc(pin.label || '');
+      const pinCol = pin.colour || '#d9ff4f';
       const iconHtml = `<div style="
         display:flex;flex-direction:column;align-items:center;
         transform:translate(-50%,-100%);
-        pointer-events:none;
+        cursor:pointer;
       ">
         <svg viewBox="0 0 24 30" width="28" height="28" xmlns="http://www.w3.org/2000/svg"
           style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.7));">
           <path d="M12 1C7.58 1 4 4.58 4 9c0 6.56 8 20 8 20s8-13.44 8-20c0-4.42-3.58-8-8-8z"
-            fill="#d9ff4f" stroke="#7aa820" stroke-width="1.2"/>
+            fill="${pinCol}" stroke="rgba(0,0,0,0.45)" stroke-width="1.2"/>
           <circle cx="12" cy="9" r="3.2" fill="#0a1810"/>
         </svg>
         ${pinLbl ? `<div style="
           margin-top:2px;
           background:rgba(10,13,12,0.85);
-          color:#d9ff4f;
-          border:1px solid rgba(217,255,79,0.35);
+          color:${pinCol};
+          border:1px solid rgba(255,255,255,0.2);
           border-radius:6px;
           padding:2px 7px;
           font-size:11px;
@@ -7339,22 +7493,7 @@ function drawToolsOnLeaflet() {
       const marker = L.marker([pin.lat, pin.lng], { icon, interactive: true }).addTo(APP.leaf);
       const pinLabel = pin.label || '';
       const pinTitle = pinLabel || '📍 Location Pin';
-      marker.bindPopup(`
-        <div style="font-family:'Inter',sans-serif;font-size:13px;color:#eef3ec;min-width:170px;">
-          <div style="font-weight:700;margin-bottom:4px;color:#d9ff4f;">${pinTitle}</div>
-          <div style="color:#9ba89e;font-size:11px;margin-bottom:10px;">${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}</div>
-          <div style="display:flex;gap:6px;">
-            <button onclick="editPlainPin('${pin.id}')" style="
-              flex:1;padding:7px;border-radius:8px;border:1px solid rgba(217,255,79,0.3);
-              background:rgba(217,255,79,0.08);color:#d9ff4f;font-family:'Inter',sans-serif;
-              font-size:12px;cursor:pointer;">✏️ Edit</button>
-            <button onclick="deletePlainPin('${pin.id}')" style="
-              flex:1;padding:7px;border-radius:8px;border:1px solid #ff4a3a44;
-              background:#1c1a1a;color:#ff4a3a;font-family:'Inter',sans-serif;
-              font-size:12px;cursor:pointer;">🗑 Delete</button>
-          </div>
-        </div>
-      `, { className: 'photo-pin-popup' });
+      marker.on('click', (ev) => { if (ev && ev.originalEvent) L.DomEvent.stopPropagation(ev); editPlainPin(pin.id); });
       APP._leafPlainPins.push(marker);
     });
   }
@@ -8082,6 +8221,9 @@ async function actionDelete() {
     localStorage.setItem('fft.recents', JSON.stringify(list));
     clearMapState(name);
     await deletePdfBlob(name);
+    // Photo pins and waypoints for this map too — they'd otherwise sit in storage forever
+    await deletePdfBlob(photoKey(name));
+    try { localStorage.removeItem('fft.photos.' + name); localStorage.removeItem('fft.waypoints.' + name); } catch (_) {}
     toast('Deleted', 'info');
   } catch(e){}
   closeActionSheet();
@@ -9432,6 +9574,15 @@ window.addEventListener('resize', () => {
     <div class="as-title">Drop Pin</div>
     <div class="as-sub">Mark a location</div>
   </div>
+  <button class="as-btn" onclick="hidePinsSheet();startPlacePin()">
+    <div class="as-ico">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <line x1="12" y1="6" x2="12" y2="12"/><line x1="9" y1="9" x2="15" y2="9"/>
+      </svg>
+    </div>
+    Place pin on map
+  </button>
   <button class="as-btn" onclick="hidePinsSheet();dropWaypointPinFromMenu()">
     <div class="as-ico">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -9439,7 +9590,7 @@ window.addEventListener('resize', () => {
         <circle cx="12" cy="9" r="2.5"/>
       </svg>
     </div>
-    Location pin
+    Pin at my location
   </button>
   <button class="as-btn" onclick="hidePinsSheet();triggerPhotoPinFromMenu()">
     <div class="as-ico">
@@ -9642,7 +9793,7 @@ window.addEventListener('resize', () => {
     box-shadow:0 24px 64px rgba(0,0,0,0.7);
   ">
     <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:17px;
-      color:#eef3ec;margin-bottom:4px;">Name this pin</div>
+      color:#eef3ec;margin-bottom:4px;" id="pin-modal-title">Pin</div>
     <div id="pin-label-coords" style="font-size:12px;color:#6c7a70;margin-bottom:16px;font-family:'Inter',sans-serif;"></div>
     <input id="pin-label-input" type="text" maxlength="40"
       placeholder="e.g. Gate, Stack, Water source…"
@@ -9655,13 +9806,18 @@ window.addEventListener('resize', () => {
         outline:none;box-sizing:border-box;margin-bottom:8px;
       "/>
     <div style="font-size:12px;color:#6c7a70;margin-bottom:18px;font-family:'Inter',sans-serif;">
-      Leave blank to save without a name
+      Name is optional
     </div>
+    <div id="pin-colour-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;"></div>
+    <button id="pin-delete-btn" onclick="deletePendingPin()" style="
+      display:none;width:100%;margin-bottom:10px;padding:11px;border-radius:12px;
+      border:1px solid rgba(255,74,58,0.35);background:rgba(255,74,58,0.08);color:#ff4a3a;
+      font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Delete pin</button>
     <div style="display:flex;gap:10px;">
       <button onclick="dismissPinModal()" style="
         flex:1;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);
         background:#1c2622;color:#9ba89e;font-family:'Inter',sans-serif;
-        font-size:14px;cursor:pointer;font-weight:600;">Skip</button>
+        font-size:14px;cursor:pointer;font-weight:600;" id="pin-skip-btn">Skip</button>
       <button onclick="confirmPinLabel()" style="
         flex:2;padding:12px;border-radius:12px;border:1px solid rgba(217,255,79,0.35);
         background:rgba(217,255,79,0.12);color:#d9ff4f;font-family:'Inter',sans-serif;
