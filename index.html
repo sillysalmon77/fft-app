@@ -483,6 +483,37 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .settings-row-sub{
   font-size:12px;color:var(--text-faint);line-height:1.4;
 }
+/* ---- Member profile sheet (above the Squad panel) ---- */
+#mp-backdrop{z-index:900;}
+#mp-sheet{z-index:901;padding:18px 18px 12px;max-height:80vh;overflow-y:auto;}
+.mp-context{font-size:12px;color:var(--leaf);font-weight:700;margin-bottom:12px;line-height:1.4;}
+.mp-context:empty{display:none;}
+.mp-top{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.mp-avatar{width:64px;height:64px;border-radius:50%;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:26px;border:2.5px solid var(--leaf);}
+.mp-avatar img{width:100%;height:100%;object-fit:cover;}
+.mp-handle{font-family:'Manrope',sans-serif;font-weight:800;font-size:19px;color:var(--text);word-break:break-all;}
+.mp-meta{font-size:12px;color:var(--text-faint);margin-top:3px;line-height:1.4;}
+.mp-bio{font-size:14px;color:var(--text-dim);line-height:1.45;margin-bottom:12px;white-space:pre-wrap;word-break:break-word;}
+.mp-bio:empty{display:none;}
+#mp-tickets{margin-bottom:12px;}
+#mp-tickets:empty{display:none;}
+.mp-stats{font-size:12px;color:var(--text-faint);padding:10px 0 12px;border-top:1px solid rgba(255,255,255,0.08);}
+.sq-member{display:flex;align-items:center;gap:10px;padding:7px 4px;border-radius:10px;cursor:pointer;}
+.sq-member:active{background:rgba(255,255,255,0.06);}
+.sq-member .sq-chev{margin-left:auto;color:var(--text-faint);font-size:16px;}
+.sq-comp-label{background:rgba(10,13,12,0.8);border:none;color:#eef3ec;font-weight:700;font-size:11px;box-shadow:none;}
+.sq-comp-label::before{display:none;}
+/* ---- Update banner ---- */
+#update-banner{position:fixed;left:12px;right:12px;top:calc(max(env(safe-area-inset-top,10px),10px) + 6px);z-index:960;
+  display:none;align-items:center;gap:10px;padding:12px 12px 12px 16px;border-radius:16px;
+  background:rgba(14,22,16,0.97);border:1px solid rgba(217,255,79,0.45);box-shadow:0 10px 30px rgba(0,0,0,0.55),0 0 18px rgba(217,255,79,0.15);}
+#update-banner.show{display:flex;animation:wpIn 260ms ease;}
+.ub-text{flex:1;min-width:0;}
+.ub-title{font-weight:800;font-size:14px;color:var(--leaf);}
+.ub-sub{font-size:12px;color:var(--text-dim);margin-top:2px;line-height:1.35;}
+.ub-go{padding:10px 14px;border-radius:12px;border:none;background:var(--leaf);color:#0a0d0c;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap;}
+.ub-x{width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.07);color:var(--text-dim);font-size:14px;cursor:pointer;flex-shrink:0;}
 /* ---- Squad invite buttons ---- */
 .sq-inv-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 6px;border-radius:12px;
   background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;}
@@ -2761,12 +2792,18 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
       </div>
       <!-- Clear buttons removed — tap any line/sketch/area on map to delete -->
       <button class="tm-btn" id="tm-squad-send" onclick="sendToSquad()">
-        <span>Send to squad</span>
+        <span>Share map to squad</span>
         <span class="tm-ico">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 2L11 13"/>
             <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
           </svg>
+        </span>
+      </button>
+      <button class="tm-btn" id="tm-squad-show" onclick="hideToolMenu(); setSquadShowPref(!squadShowPref())">
+        <span id="tm-squad-show-label">Squad on map: on</span>
+        <span class="tm-ico">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </span>
       </button>
       <button class="tm-btn" id="tm-account" onclick="openAccountScreen()">
@@ -3169,8 +3206,8 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
       <div id="sq-maps" style="margin:8px 0 4px;"></div>
 
       <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 10px;border-top:1px solid rgba(255,255,255,0.08);margin-top:6px;font-size:13px;color:var(--text);">
-        <span>Show squad tracks on map</span>
-        <input type="checkbox" id="sq-overlay-toggle" onchange="squadOverlayToggle(this.checked)"/>
+        <span>Show squad on my maps</span>
+        <input type="checkbox" id="sq-overlay-toggle" onchange="setSquadShowPref(this.checked)"/>
 
       </label>
       <button onclick="renderSquadPanel()" style="width:100%;padding:12px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--text);font-weight:700;font-size:13px;margin-top:10px;">Refresh</button>
@@ -3509,7 +3546,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   checkOnboarding();
   initBasemap();
   initInviteLinks();
+  setTimeout(() => {
+    try {
+      refreshSquadOverlays();
+      const sq = getSquad();
+      if (sq && typeof sbReady === 'function' && sbReady()) squadUpsertMember(sq.id, getMemberName(), getMyAvatarUrl());
+    } catch (e) { console.warn(e); }
+  }, 3000);
   setTimeout(verifyUsernameOnline, 2500);
+  initUpdates();
   renderRecents();
   hookGestures();
   installToolTapHandlers();
@@ -3908,6 +3953,8 @@ async function loadPdfFromBuffer(buf, name, size, restoreState) {
 
   // Load any photo pins for this map
   loadPhotoPins();
+  // Squadmates' tracks, pins and drawings on this map too
+  if (getSquad() && squadShowPref()) startSquadMapOverlay(null);
   loadWaypoints();
 }
 
@@ -4010,6 +4057,7 @@ function latLngToPage(lat, lng) {
    ========================================================= */
 function setMode(m) {
   APP.mode = m;
+  setTimeout(() => { try { refreshSquadOverlays(); } catch (e) {} }, 0);
   const canvas = document.getElementById('pdf-canvas');
   const tc = document.getElementById('tools-canvas');
   const leaf = document.getElementById('leaflet');
@@ -4847,6 +4895,7 @@ function recenter() {
    TOOLS — Measure / Area / Calibrate
    ========================================================= */
 function toggleToolMenu() {
+  try { updateSquadMenuLabel(); } catch (e) {}
   const m = document.getElementById('tool-menu');
   const fab = document.getElementById('fab-stack');
   refreshToolMenuVisibility();
@@ -8547,9 +8596,16 @@ function getProfile() {
   try { const p = JSON.parse(localStorage.getItem('fft.profile') || '{}'); return { bio: p.bio || '', exp: p.exp || '', tickets: Array.isArray(p.tickets) ? p.tickets : [] }; }
   catch (e) { return { bio: '', exp: '', tickets: [] }; }
 }
+let _pfSyncTimer = null;
 function setProfile(p) {
   try { localStorage.setItem('fft.profile', JSON.stringify(p)); } catch (e) { warnIfStorageFull(e); }
   flashProfileSaved();
+  // Keep your squad's copy of your profile up to date
+  clearTimeout(_pfSyncTimer);
+  _pfSyncTimer = setTimeout(() => {
+    const sq = getSquad();
+    if (sq && typeof sbReady === 'function' && sbReady()) squadUpsertMember(sq.id, getMemberName(), getMyAvatarUrl());
+  }, 1500);
 }
 function getLocalAvatar() { try { return localStorage.getItem('fft.avatarData') || ''; } catch (e) { return ''; } }
 function myAvatarSrc() { return getLocalAvatar() || getMyAvatarUrl() || ''; }
@@ -8966,8 +9022,10 @@ async function uploadToSquadMedia(path, file) {
 async function squadUpsertMember(squadId, name, avatarUrl) {
   if (!sbReady()) return;
   try {
+    const pf = getProfile();
     await sb.from('squad_members').upsert(
-      { squad_id: squadId, device_id: getDeviceId(), name, avatar_url: avatarUrl || null },
+      { squad_id: squadId, device_id: getDeviceId(), name, avatar_url: avatarUrl || null,
+        bio: (pf.bio || '').slice(0, 300) || null, exp: pf.exp || null, tickets: (pf.tickets || []).slice(0, 40) },
       { onConflict: 'squad_id,device_id' }
     );
   } catch (e) { console.warn(e); }
@@ -8984,6 +9042,7 @@ async function squadCreate(squadName, memberName) {
     setMemberName(memberName);
     await squadUpsertMember(data.id, memberName, getMyAvatarUrl());
     renderSquadPanel();
+    refreshSquadOverlays();
     toast('Squad created — code ' + data.code, 'ok');
   } catch (e) {
     console.warn(e);
@@ -8999,6 +9058,7 @@ async function squadJoin(code, memberName) {
     setMemberName(memberName);
     await squadUpsertMember(data.id, memberName, getMyAvatarUrl());
     renderSquadPanel();
+    refreshSquadOverlays();
     toast('Joined ' + data.name, 'ok');
   } catch (e) {
     console.warn(e);
@@ -9010,6 +9070,7 @@ function squadLeaveNow() {
   const t = document.getElementById('sq-overlay-toggle');
   if (t) t.checked = false;
   squadOverlayToggle(false);
+  stopSquadMapOverlay(); if (APP.mode === 'pdf') drawToolsOnPdf();
   renderSquadPanel();
   toast('Left squad', 'info');
 }
@@ -9145,15 +9206,23 @@ function getAvatarImageEl(url) {
 }
 
 async function squadLoadMapOverlay(mapId) {
-  if (!mapId) return;
+  if (!getSquad()) return;
+  mapId = mapId || null;
   const [tracks, presence, members] = await Promise.all([
-    squadFetchTracksForMap(mapId),
-    squadFetchPresenceForMap(mapId),
+    mapId ? squadFetchTracksForMap(mapId) : squadFetchTracks(),
+    mapId ? squadFetchPresenceForMap(mapId) : squadFetchPresence(),
     squadFetchMembers()
   ]);
+  cacheSquadMembers(members);
   const avatarByName = {};
   members.forEach(m => { avatarByName[m.name] = m.avatar_url || null; });
-  APP._squadMapOverlay = { mapId, tracks, presence, avatarByName };
+  if ((APP.squadMapId || null) !== mapId) return;      // map changed while loading
+  APP._squadMapOverlay = {
+    mapId,
+    tracks: tracks.filter(r => !isMineRow(r)),          // your own items are already drawn
+    presence: presence.filter(r => !isMineRow(r)),
+    avatarByName
+  };
   if (APP.mode === 'pdf') drawToolsOnPdf();
 }
 
@@ -9282,7 +9351,7 @@ let _squadHighlightUntil = 0;
 
 function drawSquadOnPdf(ctx) {
   const ov = APP._squadMapOverlay;
-  if (!ov || ov.mapId !== APP.squadMapId) return;
+  if (!ov || ov.mapId !== (APP.squadMapId || null) || !squadShowPref()) return;
   const scale = Math.max(APP.view.scale || 1, 0.001);
   const K = Math.max(0.3, Math.min(20, 1 / scale));
   const toXY = (lat, lng) => {
@@ -9317,6 +9386,33 @@ function drawSquadOnPdf(ctx) {
       ctx.globalAlpha = 1;
       lastPt = line[line.length - 1];
     });
+    // Drawings (in the colour the owner picked)
+    (r.pts.sketches || []).forEach(sk => {
+      if (!sk || !sk.pts || sk.pts.length < 2) return;
+      const xy = sk.pts.map(p => toXY(p[0], p[1]));
+      allPts.push(...xy);
+      ctx.strokeStyle = sk.colour || color; ctx.lineWidth = (isHi ? 7 : 4) * K; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.globalAlpha = 0.85; ctx.beginPath();
+      xy.forEach(([x, y], i) => { if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+      ctx.stroke(); ctx.globalAlpha = 1;
+    });
+    // Compartments they've marked out, with names
+    (r.pts.comps || []).forEach(c => {
+      if (!c || !c.pts || c.pts.length < 3) return;
+      const xy = c.pts.map(p => toXY(p[0], p[1]));
+      allPts.push(...xy);
+      const cc = c.colour || color;
+      ctx.strokeStyle = cc; ctx.lineWidth = (isHi ? 6 : 3) * K; ctx.setLineDash([10 * K, 7 * K]);
+      ctx.fillStyle = cc; ctx.globalAlpha = isHi ? 0.22 : 0.1;
+      ctx.beginPath(); xy.forEach(([x, y], i) => { if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 0.9; ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      if (c.label) {
+        const cx = xy.reduce((a, q) => a + q[0], 0) / xy.length, cy = xy.reduce((a, q) => a + q[1], 0) / xy.length;
+        ctx.font = '700 ' + (12 * K) + 'px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.lineWidth = 3 * K; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.strokeText(c.label, cx, cy);
+        ctx.fillStyle = cc; ctx.fillText(c.label, cx, cy);
+      }
+    });
     (r.pts.area || []).forEach(poly => {
       if (!poly || poly.length < 3) return;
       const xyPoly = poly.map(p => toXY(p[0], p[1]));
@@ -9330,10 +9426,32 @@ function drawSquadOnPdf(ctx) {
     });
     if (allPts.length) {
       hitTargets.push({
-        id: r.id, memberName: r.member_name, distM: r.dist_m,
-        areaHa: r.area_ha, createdAt: r.created_at, points: allPts
+        id: r.id, row: r, memberName: r.member_name, distM: r.dist_m,
+        areaHa: r.area_ha, createdAt: r.updated_at || r.created_at, points: allPts
       });
     }
+    // Their pins — small teardrop in the pin's colour, owner's initial inside
+    (r.pts.pins || []).forEach(pn => {
+      const [x, y] = toXY(pn.lat, pn.lng);
+      const rr = Math.max(6, Math.min(60, 10 / Math.max(scale, 0.001)));
+      const cy = y - rr * 1.6, pc = pn.colour || color;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(x, cy, rr, Math.PI * 0.85, Math.PI * 0.15); ctx.lineTo(x, y); ctx.closePath();
+      ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = rr * 0.5; ctx.fillStyle = pc; ctx.fill(); ctx.shadowBlur = 0;
+      ctx.lineWidth = rr * 0.22; ctx.strokeStyle = color; ctx.stroke();
+      ctx.fillStyle = '#0a1810'; ctx.font = '800 ' + (rr * 1.05) + 'px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText((r.member_name || '?').charAt(0).toUpperCase(), x, cy + rr * 0.05);
+      if (pn.label) {
+        ctx.font = '700 ' + (rr * 0.95) + 'px Inter, sans-serif';
+        const tw = ctx.measureText(pn.label).width, pad = rr * 0.45, h = rr * 1.45, bx = x - tw / 2 - pad, by = y + rr * 0.35;
+        ctx.fillStyle = 'rgba(10,13,12,0.88)'; ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(bx, by, tw + pad * 2, h, rr * 0.4); else ctx.rect(bx, by, tw + pad * 2, h);
+        ctx.fill(); ctx.fillStyle = pc; ctx.fillText(pn.label, x, by + h / 2);
+      }
+      ctx.restore();
+      hitTargets.push({ id: r.id + ':pin', row: r, memberName: r.member_name, pin: pn, createdAt: r.updated_at || r.created_at,
+        points: [[x, y]], pinCX: x, pinCY: cy, pinR: rr * 1.8 });
+    });
     if (lastPt) {
       const [x, y] = toXY(lastPt[0], lastPt[1]);
       const pin = drawSquadAvatarPin(ctx, x, y, r.member_name, ov.avatarByName[r.member_name], false);
@@ -9392,39 +9510,149 @@ function hitTestSquadTrack(clientX, clientY) {
 
 /* Highlights the tapped track briefly and shows who/how far/when in a toast */
 function showSquadTrackInfo(t) {
-  _squadHighlightId = t.id;
-  _squadHighlightUntil = Date.now() + 2500;
+  if (t.row) { _squadHighlightId = t.row.id; _squadHighlightUntil = Date.now() + 2500; }
   drawToolsOnPdf();
-  setTimeout(() => { if (_squadHighlightId === t.id) { _squadHighlightId = null; drawToolsOnPdf(); } }, 2500);
-  const dateStr = t.createdAt ? new Date(t.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '';
-  const measure = t.distM ? fmtDist(t.distM) : (t.areaHa ? t.areaHa.toFixed(2) + ' ha' : '');
-  const parts = [t.memberName, measure, dateStr].filter(Boolean);
-  toast(parts.join(' · '), 'info');
+  const hid = _squadHighlightId;
+  setTimeout(() => { if (_squadHighlightId === hid) { _squadHighlightId = null; drawToolsOnPdf(); } }, 2500);
   haptic([15, 25, 15]);
+  openMemberProfile(t.row || { member_name: t.memberName }, squadItemContext(t.row, t.pin));
 }
 
+/* ---- Squad on the map: shared state + helpers ---- */
+const SQV = { byDevice: {}, byName: {} };
+function cacheSquadMembers(members) {
+  SQV.byDevice = {}; SQV.byName = {};
+  (members || []).forEach(m => { if (m.device_id) SQV.byDevice[m.device_id] = m; if (m.name) SQV.byName[m.name] = m; });
+}
+function isMineRow(r) { return r && (r.device_id ? r.device_id === getDeviceId() : r.member_name === getMemberName()); }
+function squadShowPref() { try { return localStorage.getItem('fft.showSquad') !== '0'; } catch (e) { return true; } }
+function setSquadShowPref(on) {
+  try { localStorage.setItem('fft.showSquad', on ? '1' : '0'); } catch (e) {}
+  const ot = document.getElementById('sq-overlay-toggle'); if (ot) ot.checked = on;
+  updateSquadMenuLabel();
+  if (APP.leaf) squadOverlayToggle(on && !!getSquad());
+  if (APP.mode === 'pdf') { if (on && getSquad()) startSquadMapOverlay(APP.squadMapId || null); else { stopSquadMapOverlay(); drawToolsOnPdf(); } }
+  toast(on ? 'Showing your squad on the map' : 'Squad hidden from the map', 'info');
+}
+function updateSquadMenuLabel() {
+  const el = document.getElementById('tm-squad-show-label');
+  if (el) el.textContent = squadShowPref() ? 'Squad on map: on' : 'Squad on map: off';
+  const row = document.getElementById('tm-squad-show'); if (row) row.style.display = getSquad() ? '' : 'none';
+}
+function refreshSquadOverlays() {
+  if (!getSquad() || !squadShowPref()) return;
+  if (APP.mode === 'pdf') { if (APP.fwd) squadLoadMapOverlay(APP.squadMapId || null); }
+  else if (APP.leaf) { if (!squadLayerGroup || !squadOverlayTimer) squadOverlayToggle(true); else squadRedrawOverlay(); }
+}
+function timeAgo(iso) {
+  if (!iso) return '';
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 90) return 'just now';
+  if (s < 3600) return Math.round(s / 60) + ' min ago';
+  if (s < 86400) return Math.round(s / 3600) + ' h ago';
+  if (s < 86400 * 14) return Math.round(s / 86400) + ' days ago';
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+function squadItemContext(r, pin) {
+  if (!r) return '';
+  if (r.recording !== undefined && r.lat != null) return 'Tracking now';
+  const where = r.job_name ? ' · ' + r.job_name : '';
+  const when = timeAgo(r.updated_at || r.created_at);
+  if (pin) return 'Pin' + (pin.label ? ' “' + pin.label + '”' : '') + where + (when ? ' · ' + when : '');
+  const bits = [];
+  if (+r.dist_m) bits.push(fmtDist(+r.dist_m) + ' tracked');
+  if (+r.area_ha) bits.push((+r.area_ha).toFixed(2) + ' ha');
+  return (bits.join(' · ') || 'Shared') + where + (when ? ' · ' + when : '');
+}
+async function openMemberProfile(r, context) {
+  let m = (r && r.device_id && SQV.byDevice[r.device_id]) || (r && SQV.byName[r.member_name]);
+  if (!m && getSquad()) { cacheSquadMembers(await squadFetchMembers()); m = (r.device_id && SQV.byDevice[r.device_id]) || SQV.byName[r.member_name]; }
+  const name = (m && m.name) || (r && r.member_name) || 'Unknown';
+  const isMe = m ? m.device_id === getDeviceId() : name === getMemberName();
+  const sq = getSquad();
+  const colour = squadColor(name);
+  const avUrl = isMe ? myAvatarSrc() : (m && m.avatar_url);
+  const av = document.getElementById('mp-avatar');
+  av.style.borderColor = colour;
+  av.style.background = colour + '22'; av.style.color = colour;
+  av.innerHTML = avUrl ? '<img src="' + esc(avUrl) + '" alt=""/>' : esc(name.charAt(0).toUpperCase());
+  document.getElementById('mp-context').textContent = context || '';
+  document.getElementById('mp-handle').textContent = '@' + name;
+  const pf = isMe ? getProfile() : null;
+  const exp = isMe ? pf.exp : (m && m.exp);
+  const bio = isMe ? pf.bio : (m && m.bio);
+  const tickets = isMe ? pf.tickets : ((m && m.tickets) || []);
+  const meta = [];
+  if (sq && m && m.device_id === sq.ownerDeviceId) meta.push('Squad owner'); else if (sq && m) meta.push(sq.name);
+  if (exp) meta.push(exp + ' experience');
+  if (m && m.joined_at) meta.push('joined ' + new Date(m.joined_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }));
+  document.getElementById('mp-meta').textContent = meta.join(' · ') || (isMe ? 'This is you' : '');
+  document.getElementById('mp-bio').textContent = bio || '';
+  document.getElementById('mp-tickets').innerHTML = (tickets || []).map(t => '<span class="pf-chip on small">' + esc(t) + '</span>').join('');
+  // What they've shared with the squad
+  let rows = APP._squadRowsCache;
+  if (!rows && sq) rows = await squadFetchTracks();
+  const theirs = (rows || []).filter(x => m && x.device_id ? x.device_id === m.device_id : x.member_name === name);
+  const ha = theirs.reduce((a, x) => a + (+x.area_ha || 0), 0), km = theirs.reduce((a, x) => a + (+x.dist_m || 0), 0) / 1000;
+  const pinsN = theirs.reduce((a, x) => a + ((x.pts && x.pts.pins) ? x.pts.pins.length : 0), 0);
+  document.getElementById('mp-stats').textContent = theirs.length
+    ? 'Shared on ' + theirs.length + ' map' + (theirs.length > 1 ? 's' : '') + ' · ' + ha.toFixed(2) + ' ha · ' + km.toFixed(2) + ' km tracked' + (pinsN ? ' · ' + pinsN + ' pin' + (pinsN > 1 ? 's' : '') : '')
+    : (isMe ? 'Use “Share map to squad” to show your work here.' : 'Hasn\'t shared anything yet.');
+  document.getElementById('mp-backdrop').classList.add('show');
+  document.getElementById('mp-sheet').classList.add('show');
+}
+function closeMemberProfile() {
+  document.getElementById('mp-backdrop').classList.remove('show');
+  document.getElementById('mp-sheet').classList.remove('show');
+}
+
+/* Share everything you've put on this map with the squad: track, areas,
+   compartments, pins and drawings. One shared layer per person per map —
+   sharing again updates it rather than adding a copy. */
+function squadMapKey() {
+  if (APP.squadMapId) return 'map:' + APP.squadMapId;
+  return APP.fileName ? 'file:' + APP.fileName : 'basemap';
+}
+const r6 = v => Math.round(v * 1e6) / 1e6;
 async function sendToSquad() {
   hideToolMenu();
   const sq = getSquad();
   if (!sq) { toast('Join or create a squad first', 'info'); openSquad(); return; }
   if (!sbReady()) { toast('Squad not set up yet', 'err'); return; }
-  const trackPts = (TRACK.pts || []).map(p => [p.lat, p.lng]);
-  const areaPts = (TOOL.areaPts || []).length >= 3 ? TOOL.areaPts.map(p => [p.lat, p.lng]) : null;
-  if (!trackPts.length && !areaPts) { toast('No track or area to send yet', 'info'); return; }
-  const areaHa = areaPts ? polyArea(TOOL.areaPts) / 10000 : 0;
+  const ll = p => [r6(p.lat), r6(p.lng)];
+  const trackPts = (TRACK.pts || []).map(ll);
+  const areaPts = (TOOL.areaPts || []).length >= 3 ? TOOL.areaPts.map(ll) : null;
+  const comps = (TOOL.compartments || []).filter(c => c.pts && c.pts.length >= 3)
+    .map(c => ({ label: c.label || '', colour: c.colour || null, ha: +(((c.area || 0) / 10000).toFixed(3)), pts: c.pts.map(ll) }));
+  const pins = (TOOL.plainPins || []).map(p => ({ lat: r6(p.lat), lng: r6(p.lng), label: (p.label || '').slice(0, 40), colour: p.colour || '#d9ff4f' }));
+  const sketches = (TOOL.sketchPaths || []).map((st, i) => ({ colour: (TOOL.sketchColours && TOOL.sketchColours[i]) || '#d9ff4f', pts: (st || []).map(ll) }))
+    .filter(st => st.pts.length >= 2);
+  if (!trackPts.length && !areaPts && !comps.length && !pins.length && !sketches.length) {
+    toast('Nothing on this map to share yet', 'info'); return;
+  }
+  const areaHa = (areaPts ? polyArea(TOOL.areaPts) / 10000 : 0) + comps.reduce((a, c) => a + (c.ha || 0), 0);
   const payload = {
     squad_id: sq.id,
+    device_id: getDeviceId(),
+    map_key: squadMapKey(),
     member_name: getMemberName() || 'Contractor',
-    job_name: APP.fileName || 'Untitled map',
+    job_name: (APP.fileName || 'Basemap').replace(/\.pdf$/i, ''),
     map_id: APP.squadMapId || null,
-    area_ha: areaHa,
-    dist_m: TRACK.totalDist || 0,
-    pts: { track: trackPts.length ? [trackPts] : [], area: areaPts ? [areaPts] : [] }
+    area_ha: +areaHa.toFixed(3),
+    dist_m: Math.round(TRACK.totalDist || 0),
+    updated_at: new Date().toISOString(),
+    pts: { track: trackPts.length ? [trackPts] : [], area: areaPts ? [areaPts] : [], comps, pins, sketches }
   };
   try {
-    const { error } = await sb.from('squad_tracks').insert(payload);
-    if (error) { toast('Send failed — check connection', 'err'); console.warn(error); return; }
-    toast('Sent to ' + sq.name, 'ok');
+    const { error } = await sb.from('squad_tracks').upsert(payload, { onConflict: 'squad_id,device_id,map_key' });
+    if (error) { toast('Share failed — check connection', 'err'); console.warn(error); return; }
+    const bits = [];
+    if (trackPts.length) bits.push('track');
+    if (areaPts || comps.length) bits.push((comps.length + (areaPts ? 1 : 0)) + ' area' + (comps.length + (areaPts ? 1 : 0) > 1 ? 's' : ''));
+    if (pins.length) bits.push(pins.length + ' pin' + (pins.length > 1 ? 's' : ''));
+    if (sketches.length) bits.push(sketches.length + ' drawing' + (sketches.length > 1 ? 's' : ''));
+    toast('Shared ' + bits.join(', ') + ' with ' + sq.name, 'ok');
+    refreshSquadOverlays();
   } catch (e) {
     console.warn(e);
     toast('Network error — check your connection and try again', 'err');
@@ -9581,10 +9809,19 @@ async function renderSquadPanel() {
     const av = m.avatar_url
       ? '<img src="' + esc(m.avatar_url) + '" style="width:32px;height:32px;border-radius:9px;object-fit:cover;"/>'
       : '<div style="width:32px;height:32px;border-radius:9px;background:' + squadColor(m.name) + '22;display:flex;align-items:center;justify-content:center;color:' + squadColor(m.name) + ';font-size:13px;font-weight:800;">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;">' + av +
-      '<span style="font-size:13px;color:var(--text);">' + esc(m.name) + (isOwner ? ' <span style="color:var(--text-faint);font-size:11px;">· owner</span>' : '') + '</span>' +
-    '</div>';
+    const sub = [m.exp ? esc(m.exp) : '', (m.tickets && m.tickets.length) ? m.tickets.length + ' ticket' + (m.tickets.length > 1 ? 's' : '') : ''].filter(Boolean).join(' · ');
+    return '<div class="sq-member" data-dev="' + esc(m.device_id) + '">' + av +
+      '<span style="font-size:13px;color:var(--text);">' + esc(m.name) + (isOwner ? ' <span style="color:var(--text-faint);font-size:11px;">· owner</span>' : '') +
+      (m.device_id === getDeviceId() ? ' <span style="color:var(--text-faint);font-size:11px;">· you</span>' : '') +
+      (sub ? '<br><span style="font-size:11px;color:var(--text-faint);">' + sub + '</span>' : '') + '</span>' +
+      '<span class="sq-chev">›</span></div>';
   }).join('') : '<div style="padding:8px 0;color:var(--text-faint);font-size:12px;">No members yet.</div>';
+  cacheSquadMembers(members);
+  APP._squadRowsCache = rows;
+  membersEl.querySelectorAll('.sq-member').forEach(el => {
+    el.onclick = () => { const m = SQV.byDevice[el.dataset.dev]; if (m) openMemberProfile({ device_id: m.device_id, member_name: m.name }, ''); };
+  });
+  const ot = document.getElementById('sq-overlay-toggle'); if (ot) ot.checked = squadShowPref();
 
   mapsEl.innerHTML = maps.length ? maps.map(m => {
     const thumb = m.thumb_url
@@ -9635,9 +9872,13 @@ function squadAvatarIcon(name, avatarUrl, opts) {
 async function squadRedrawOverlay() {
   if (!APP.leaf || !squadLayerGroup) return;
   const sq = getSquad();
-  if (!sq) return;
-  const [rows, presence, members] = await Promise.all([squadFetchTracks(), squadFetchPresence(), squadFetchMembers()]);
+  if (!sq || !squadShowPref()) { squadLayerGroup.clearLayers(); return; }
+  if (APP.mode === 'pdf') return;          // the GeoPDF view has its own overlay
+  let [rows, presence, members] = await Promise.all([squadFetchTracks(), squadFetchPresence(), squadFetchMembers()]);
+  cacheSquadMembers(members);
+  rows = rows.filter(r => !isMineRow(r)); presence = presence.filter(r => !isMineRow(r));
   squadLayerGroup.clearLayers();
+  const onTap = (r, pin) => (ev) => { if (ev && ev.originalEvent) L.DomEvent.stopPropagation(ev); openMemberProfile(r, squadItemContext(r, pin)); };
 
   const avatarByName = {};
   members.forEach(m => { avatarByName[m.name] = m.avatar_url || null; });
@@ -9650,17 +9891,37 @@ async function squadRedrawOverlay() {
     let lastPt = null;
     (r.pts.track || []).forEach(line => {
       if (!line || line.length < 2) return;
-      L.polyline(line, { color, weight: 3, opacity: 0.85 }).bindTooltip(label, { direction: 'center' }).addTo(squadLayerGroup);
+      L.polyline(line, { color, weight: 3, opacity: 0.85 }).on('click', onTap(r)).addTo(squadLayerGroup);
       lastPt = line[line.length - 1];
     });
     (r.pts.area || []).forEach(poly => {
       if (!poly || poly.length < 3) return;
-      L.polygon(poly, { color, weight: 2, opacity: 0.85, fillColor: color, fillOpacity: 0.1 }).bindTooltip(label, { direction: 'center' }).addTo(squadLayerGroup);
+      L.polygon(poly, { color, weight: 2, opacity: 0.85, fillColor: color, fillOpacity: 0.1 }).on('click', onTap(r)).addTo(squadLayerGroup);
       if (!lastPt) lastPt = poly[poly.length - 1];
+    });
+    (r.pts.comps || []).forEach(c => {
+      if (!c || !c.pts || c.pts.length < 3) return;
+      const cc = c.colour || color;
+      const pg = L.polygon(c.pts, { color: cc, weight: 2, opacity: 0.9, dashArray: '8 6', fillColor: cc, fillOpacity: 0.08 }).on('click', onTap(r)).addTo(squadLayerGroup);
+      if (c.label) pg.bindTooltip(esc(c.label), { permanent: true, direction: 'center', className: 'sq-comp-label' });
+    });
+    (r.pts.sketches || []).forEach(sk => {
+      if (!sk || !sk.pts || sk.pts.length < 2) return;
+      L.polyline(sk.pts, { color: sk.colour || color, weight: 3, opacity: 0.85 }).on('click', onTap(r)).addTo(squadLayerGroup);
+    });
+    (r.pts.pins || []).forEach(pn => {
+      const pc = pn.colour || color;
+      const html = '<div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);cursor:pointer;">' +
+        '<svg viewBox="0 0 24 30" width="26" height="26" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.7));"><path d="M12 1C7.58 1 4 4.58 4 9c0 6.56 8 20 8 20s8-13.44 8-20c0-4.42-3.58-8-8-8z" fill="' + pc + '" stroke="' + color + '" stroke-width="2"/>' +
+        '<text x="12" y="12.5" text-anchor="middle" font-size="9" font-weight="800" font-family="Inter,sans-serif" fill="#0a1810">' + esc((r.member_name || '?').charAt(0).toUpperCase()) + '</text></svg>' +
+        (pn.label ? '<div style="margin-top:1px;background:rgba(10,13,12,0.85);color:' + pc + ';border-radius:6px;padding:1px 6px;font-size:10px;font-weight:700;white-space:nowrap;font-family:Inter,sans-serif;">' + esc(pn.label) + '</div>' : '') +
+        '</div>';
+      L.marker([pn.lat, pn.lng], { icon: L.divIcon({ className: '', html, iconSize: [0, 0], iconAnchor: [0, 0] }), zIndexOffset: 50 })
+        .on('click', onTap(r, pn)).addTo(squadLayerGroup);
     });
     if (lastPt) {
       const icon = squadAvatarIcon(r.member_name, avatarByName[r.member_name], { live: false });
-      L.marker(lastPt, { icon, zIndexOffset: 100 }).bindTooltip(esc(r.member_name) + ' · last here', { direction: 'top' }).addTo(squadLayerGroup);
+      L.marker(lastPt, { icon, zIndexOffset: 100 }).on('click', onTap(r)).addTo(squadLayerGroup);
     }
   });
 
@@ -9668,7 +9929,7 @@ async function squadRedrawOverlay() {
   presence.forEach(p => {
     if (p.lat == null || p.lng == null) return;
     const icon = squadAvatarIcon(p.member_name, avatarByName[p.member_name], { live: true });
-    L.marker([p.lat, p.lng], { icon, zIndexOffset: 500 }).bindTooltip(esc(p.member_name) + ' · tracking now', { direction: 'top', permanent: false }).addTo(squadLayerGroup);
+    L.marker([p.lat, p.lng], { icon, zIndexOffset: 500 }).on('click', onTap(p)).addTo(squadLayerGroup);
   });
 }
 async function squadOverlayToggle(on) {
@@ -9711,6 +9972,116 @@ function uiSquadJoinSubmit() {
   if (!code) { toast('Paste the invite link or enter the squad code', 'info'); return; }
   squadJoin(code, name);
 }
+/* One registration per Capacitor plugin (registering twice logs warnings) */
+const _capPlugins = {};
+function capPlugin(name) {
+  if (!isNativeApp() || !window.Capacitor.registerPlugin) return null;
+  if (window.Capacitor.isPluginAvailable && !window.Capacitor.isPluginAvailable(name)) return null;
+  return _capPlugins[name] || (_capPlugins[name] = window.Capacitor.registerPlugin(name));
+}
+
+/* =========================================================
+   APP UPDATES — from GitHub Releases (see Android.yml).
+   - Only the app screens changed (index.html): download www.zip quietly,
+     switch to it at the next launch or when you tap Restart. Never mid-track.
+   - The app itself changed (plugins, permissions, icons): offer the new APK.
+   ========================================================= */
+const UPDATE_REPO = 'sillysalmon77/fft-app';
+const UPDATE_API = 'https://api.github.com/repos/' + UPDATE_REPO + '/releases/latest';
+const UPDATE_APK = 'https://github.com/' + UPDATE_REPO + '/releases/latest/download/fft.apk';
+const FFT_THIS = (typeof window.FFT_BUILD === 'object' && window.FFT_BUILD) || null;
+
+// Tell the updater this version started fine — if a broken update never gets
+// here, the plugin rolls back to the previous version by itself.
+try { const u = capPlugin('CapacitorUpdater'); if (u) u.notifyAppReady(); } catch (e) { console.warn(e); }
+
+function isBusyForUpdate() {
+  return !!((typeof TRACK !== 'undefined' && TRACK.recording) || (typeof BORDER !== 'undefined' && (BORDER.active || BORDER.drawing)) || (typeof TOOL !== 'undefined' && TOOL.active));
+}
+function getPendingBundle() { try { return JSON.parse(localStorage.getItem('fft.pendingBundle') || 'null'); } catch (e) { return null; } }
+function setPendingBundle(v) { try { v ? localStorage.setItem('fft.pendingBundle', JSON.stringify(v)) : localStorage.removeItem('fft.pendingBundle'); } catch (e) {} }
+
+async function applyPendingBundle() {
+  const u = capPlugin('CapacitorUpdater');
+  const p = getPendingBundle();
+  if (!u || !p) return false;
+  if (FFT_THIS && p.build <= FFT_THIS.build) { setPendingBundle(null); return false; }   // already running it (or newer)
+  if (isBusyForUpdate()) return false;
+  setPendingBundle(null);              // clear first, so a failed switch can't loop
+  try { await u.set({ id: p.id }); return true; }   // reloads into the new version
+  catch (e) { console.warn('update switch failed', e); return false; }
+}
+
+function showUpdateBanner(title, sub, btnText, onGo) {
+  document.getElementById('ub-title').textContent = title;
+  document.getElementById('ub-sub').textContent = sub;
+  const go = document.getElementById('ub-go');
+  go.textContent = btnText; go.onclick = () => { hideUpdateBanner(); onGo(); };
+  document.getElementById('update-banner').classList.add('show');
+}
+function hideUpdateBanner() { document.getElementById('update-banner').classList.remove('show'); }
+
+let _updChecking = false, _updLastCheck = 0;
+async function checkForUpdates(manual) {
+  const u = capPlugin('CapacitorUpdater');
+  if (!FFT_THIS || !u) { if (manual) toast('Updates only work in the installed app', 'info'); return; }
+  if (_updChecking) return;
+  if (!navigator.onLine) { if (manual) toast('No signal — try again later', 'info'); return; }
+  _updChecking = true; _updLastCheck = Date.now();
+  try {
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 10000);
+    const res = await fetch(UPDATE_API, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store', signal: ctl.signal });
+    clearTimeout(tm);
+    if (!res.ok) throw new Error('GitHub ' + res.status);
+    const rel = await res.json();
+    const m = String(rel.body || '').match(/FFT-META\s*(\{[^}]*\})/);
+    if (!m) throw new Error('no build info on latest release');
+    const meta = JSON.parse(m[1]);
+    if (!(meta.build > FFT_THIS.build)) { if (manual) toast('You\'re on the latest version (build ' + FFT_THIS.build + ')', 'ok'); return; }
+
+    if (meta.native !== FFT_THIS.native) {
+      // The app itself changed — needs the new APK (installs over the top, keeps your data)
+      let last = 0; try { last = +localStorage.getItem('fft.apkPrompt.' + meta.build) || 0; } catch (e) {}
+      if (!manual && Date.now() - last < 20 * 3600 * 1000) return;
+      try { localStorage.setItem('fft.apkPrompt.' + meta.build, String(Date.now())); } catch (e) {}
+      showUpdateBanner('New version of the app', 'Build ' + meta.build + ' · install it over this one — your maps and tracks stay', 'Download', () => openExternal(UPDATE_APK));
+      return;
+    }
+
+    // Only the screens changed — download quietly
+    const pend = getPendingBundle();
+    let id = pend && pend.build === meta.build ? pend.id : null;
+    if (!id) {
+      const asset = (rel.assets || []).find(a => a.name === 'www.zip');
+      if (!asset) throw new Error('no www.zip on latest release');
+      if (manual) toast('Downloading update…', 'info');
+      const b = await u.download({ url: asset.browser_download_url, version: String(meta.build) });
+      id = b.id;
+      setPendingBundle({ id, build: meta.build });
+    }
+    if (isBusyForUpdate()) {
+      if (manual) toast('Update ready — it\'ll switch over next time you open the app', 'ok');
+      return;
+    }
+    showUpdateBanner('Update ready', 'Build ' + meta.build + ' · takes a couple of seconds', 'Restart', () => applyPendingBundle());
+  } catch (e) {
+    console.warn('update check failed', e);
+    if (manual) toast('Couldn\'t check for updates — ' + (e.message || e), 'err');
+  } finally { _updChecking = false; }
+}
+
+function initUpdates() {
+  const vEl = document.getElementById('pf-version');
+  if (FFT_THIS && vEl) vEl.textContent = 'Version 1.0.' + FFT_THIS.build + ' · Free GeoPDF field tool for UK forestry contractors.';
+  if (!FFT_THIS || !capPlugin('CapacitorUpdater')) return;
+  const btn = document.getElementById('pf-update-btn'); if (btn) btn.style.display = '';
+  // Fresh launch with an update already downloaded: switch now, before anything starts
+  applyPendingBundle().then(switched => { if (!switched) setTimeout(() => checkForUpdates(false), 4000); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && Date.now() - _updLastCheck > 3 * 3600 * 1000) checkForUpdates(false);
+  });
+}
+
 /* =========================================================
    SQUAD INVITES — shareable links instead of codes.
    Link → small invite page on GitHub Pages (join.html), which opens the
@@ -9736,7 +10107,7 @@ async function uiSquadInviteShare() {
   const payload = { title: 'Join ' + sq.name, text: 'Join my squad "' + sq.name + '" on Forestry Field Tracker', url: squadInviteUrl(sq), dialogTitle: 'Invite to ' + sq.name };
   try {
     if (isNativeApp() && window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('Share')) {
-      await window.Capacitor.registerPlugin('Share').share(payload); return;
+      await capPlugin('Share').share(payload); return;
     }
     if (navigator.share) { await navigator.share(payload); return; }
   } catch (e) { if (e && /cancel|abort/i.test(e.message || e.name || '')) return; console.warn(e); }
@@ -9790,7 +10161,7 @@ function initInviteLinks() {
     setTimeout(() => handleInviteCode(webCode), 800);
   }
   if (isNativeApp() && window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('App')) {
-    const AppPlugin = window.Capacitor.registerPlugin('App');
+    const AppPlugin = capPlugin('App');
     try { AppPlugin.addListener('appUrlOpen', ev => handleInviteUrl(ev && ev.url)); } catch (e) { console.warn(e); }
     try { AppPlugin.getLaunchUrl().then(r => { if (r && r.url) setTimeout(() => handleInviteUrl(r.url), 800); }).catch(() => {}); } catch (e) {}
   }
@@ -9819,6 +10190,26 @@ window.addEventListener('resize', () => {
 <!-- =========================================================
      SETTINGS SCREEN
      ========================================================= -->
+<div class="sheet-backdrop" id="mp-backdrop" onclick="closeMemberProfile()"></div>
+<div class="action-sheet" id="mp-sheet">
+  <div class="mp-context" id="mp-context"></div>
+  <div class="mp-top">
+    <div class="mp-avatar" id="mp-avatar"></div>
+    <div class="mp-id">
+      <div class="mp-handle" id="mp-handle"></div>
+      <div class="mp-meta" id="mp-meta"></div>
+    </div>
+  </div>
+  <div class="mp-bio" id="mp-bio"></div>
+  <div class="pf-chips" id="mp-tickets"></div>
+  <div class="mp-stats" id="mp-stats"></div>
+  <button class="as-btn cancel" onclick="closeMemberProfile()">Close</button>
+</div>
+<div id="update-banner" role="status">
+  <div class="ub-text"><div class="ub-title" id="ub-title"></div><div class="ub-sub" id="ub-sub"></div></div>
+  <button class="ub-go" id="ub-go"></button>
+  <button class="ub-x" onclick="hideUpdateBanner()" aria-label="Later">✕</button>
+</div>
 <div id="settings-screen">
   <div class="settings-header">
     <div class="settings-title">PROFILE</div>
@@ -9868,8 +10259,9 @@ window.addEventListener('resize', () => {
       <div class="settings-row">
         <div class="settings-row-text">
           <div class="settings-row-title">Forestry Field Tracker</div>
-          <div class="settings-row-sub">v19 · Free GeoPDF field tool for UK forestry contractors. Avenza alternative.</div>
+          <div class="settings-row-sub" id="pf-version">Free GeoPDF field tool for UK forestry contractors.</div>
         </div>
+        <button class="pf-add" id="pf-update-btn" style="display:none;padding:10px 14px;" onclick="checkForUpdates(true)">Check for updates</button>
       </div>
     </div>
   </div>
