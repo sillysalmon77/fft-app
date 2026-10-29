@@ -42,25 +42,37 @@
   <div class="code" id="code-line"></div>
 </div>
 <script>
-  // Invite link: join.html?c=CODE&n=Squad%20Name
+  // Squad invite: join.html?c=CODE&n=Squad%20Name
+  // App invite:   join.html?ref=username   (refer a crewmate)
   var q = new URLSearchParams(location.search);
   var code = (q.get('c') || q.get('code') || q.get('join') || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   var name = (q.get('n') || '').slice(0, 60);
+  var ref = (q.get('ref') || '').replace(/[^A-Za-z0-9_.]/g, '').slice(0, 20);
   var base = location.href.replace(/[^\/]*(\?.*)?$/, '');           // folder this page lives in
-  var webUrl = base + 'index.html?join=' + encodeURIComponent(code);
-  // Android: open the app if installed (fft://join?code=…), otherwise fall back to the web version
-  var appUrl = 'intent://join?code=' + encodeURIComponent(code) +
-               '#Intent;scheme=fft;package=uk.scotapps.fft;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
-  if (!code) {
-    document.getElementById('title').textContent = 'Invite link not valid';
-    document.getElementById('sub').innerHTML = '<span class="bad">This link is missing its squad code.</span> Ask for a new invite.';
-    document.getElementById('open-app').style.display = 'none';
-    document.getElementById('open-web').style.display = 'none';
+  var APK = 'https://github.com/sillysalmon77/fft-app/releases/latest/download/fft.apk';
+  var isAndroid = /Android/i.test(navigator.userAgent);
+  var $ = function (id) { return document.getElementById(id); };
+  var params = (code ? 'code=' + encodeURIComponent(code) : '') + (ref ? (code ? '&' : '') + 'ref=' + encodeURIComponent(ref) : '');
+  var webUrl = base + 'index.html?' + (code ? 'join=' + encodeURIComponent(code) : '') + (ref ? (code ? '&' : '') + 'ref=' + encodeURIComponent(ref) : '');
+  // Android: open the app if installed (fft://join?…), otherwise fall back
+  var appUrl = 'intent://join?' + params + '#Intent;scheme=fft;package=uk.scotapps.fft;S.browser_fallback_url=' + encodeURIComponent(code ? webUrl : APK) + ';end';
+  if (!code && !ref) {
+    $('title').textContent = 'Invite link not valid';
+    $('sub').innerHTML = '<span class="bad">This link is missing its invite details.</span> Ask for a new one.';
+    $('open-app').style.display = 'none'; $('open-web').style.display = 'none';
+  } else if (ref && !code) {
+    $('title').textContent = '@' + ref + ' invited you';
+    $('sub').textContent = 'Maps, GPS tracking, border mode and squad chat for forestry crews.';
+    $('open-app').textContent = isAndroid ? 'Download FFT for Android' : 'Download FFT (Android)';
+    $('open-app').href = APK;
+    $('open-web').textContent = 'Already have FFT? Open it';
+    $('open-web').href = isAndroid ? appUrl : webUrl;
+    $('code-line').innerHTML = 'When you set up, put <b>@' + ref + '</b> as who invited you.<br>Android may ask you to allow installs from your browser — that\'s normal.';
   } else {
-    if (name) document.getElementById('title').textContent = 'Join ' + name;
-    document.getElementById('open-app').href = /Android/i.test(navigator.userAgent) ? appUrl : webUrl;
-    document.getElementById('open-web').href = webUrl;
-    document.getElementById('code-line').innerHTML = 'Squad code <b>' + code + '</b><br>In the app: Squad → Join squad';
+    if (name) $('title').textContent = 'Join ' + name;
+    $('open-app').href = isAndroid ? appUrl : webUrl;
+    $('open-web').href = webUrl;
+    $('code-line').innerHTML = 'Squad code <b>' + code + '</b><br>In the app: Squad → Join squad';
   }
 </script>
 </body>

@@ -2629,6 +2629,30 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
 #mp-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;}
 #mp-actions:empty{display:none;}
 #mp-actions .ch-btn{flex:1;padding:11px 10px;font-size:13px;}
+
+/* refer to unlock */
+#pf-ref{margin:0 0 24px;padding:14px;border-radius:16px;background:rgba(217,255,79,0.05);border:1px solid rgba(217,255,79,0.22);}
+.ref-row{display:flex;gap:12px;align-items:center;}
+.ref-ico{width:42px;height:42px;border-radius:12px;background:var(--leaf);color:#0a0d0c;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ref-mid{flex:1;min-width:0;}
+.ref-t{font-weight:800;font-size:15px;}
+.ref-s{font-size:12px;color:var(--text-faint);margin-top:2px;line-height:1.4;}
+.ref-btns{display:flex;gap:8px;margin-top:12px;}
+.ref-btn{flex:1;padding:11px 10px;border-radius:12px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--text);}
+.ref-btn.lime{background:var(--leaf);border-color:var(--leaf);color:#0a0d0c;}
+.ref-by{font-size:12px;color:var(--text-faint);margin-top:10px;}
+.ref-by-form{display:flex;gap:8px;margin-top:12px;}
+.ref-by-form .pf-at-wrap{flex:1;}
+.ref-by-form .ref-btn{flex:0 0 auto;padding:0 16px;}
+#ref-backdrop{z-index:904;}
+#ref-sheet{z-index:905;padding:18px 16px 10px;}
+.ref-hero{font-size:34px;text-align:center;margin-bottom:4px;}
+.ref-title{font-family:'Manrope',sans-serif;font-weight:800;font-size:19px;text-align:center;}
+#ref-sheet-sub{font-size:13.5px;line-height:1.5;color:var(--text-dim);text-align:center;margin:8px 4px 4px;}
+#ref-sheet-status{font-size:11.5px;color:var(--text-faint);text-align:center;margin:8px 4px 14px;}
+#ref-sheet .ref-btn{display:block;width:100%;margin-bottom:8px;padding:14px;font-size:14.5px;}
+#ob-ref-wrap{width:100%;margin:-4px 0 14px;}
+#ob-ref-wrap .ob-input{margin-bottom:0;}
 </style>
 </head>
 <body>
@@ -3285,6 +3309,7 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
     <div class="ob-avatar-label">Tap to add a photo (optional)</div>
     <input type="text" id="ob-name" class="ob-input" placeholder="Username" maxlength="21" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"/>
     <div id="ob-name-hint" style="font-size:11px;color:var(--text-faint);margin:-8px 0 14px;">3–20 letters, numbers, _ or .</div>
+    <div id="ob-ref-wrap"><div style="font-size:11px;color:var(--text-faint);margin:0 0 6px;text-align:left;">Who invited you? (optional)</div><input type="text" id="ob-ref" class="ob-input" placeholder="@username" maxlength="21" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"/></div>
     <button class="ob-continue" id="ob-continue" onclick="completeOnboarding()">Get Started</button>
     <input type="file" id="ob-avatar-input" accept="image/*" style="display:none" onchange="onOnboardAvatarPicked(this.files[0])"/>
   </div>
@@ -3989,6 +4014,7 @@ async function onFilePicked(file) {
   try { document.getElementById('file-input').value = ''; } catch(e){}
   if (!file) return;
   if (typeof pdfjsLib === 'undefined') { toast('PDF engine failed to load', 'err'); return; }
+  if (!refCanAddMap(file.name)) { showUnlockSheet(); return; }
   APP.squadMapId = null; APP.viewMode = null;
   stopSquadMapOverlay();
   try {
@@ -8099,6 +8125,7 @@ function saveRecent(file) {
     if (filtered.length > 20) filtered.length = 20;
     localStorage.setItem('fft.recents', JSON.stringify(filtered));
     renderRecents();
+    refMapOpened();
   } catch (e) { console.warn('recents save failed', e); }
 }
 
@@ -8928,6 +8955,8 @@ function renderProfile() {
   if (PF_DRAFT) { renderProfileEditor(); return; }
   renderProfileCard();
   renderProfileStats();
+  renderRefCard();
+  if (typeof refSync === 'function') refSync();
 }
 
 /* ---------- Edit profile (nothing is saved until you tap Save) ---------- */
@@ -9296,6 +9325,8 @@ function isSquadOwner() {
    ========================================================= */
 function checkOnboarding() {
   if (!getMemberName()) {
+    const _pr = refLS('pendingRef'); const _ob = document.getElementById('ob-ref'); if (_pr && _ob && !_ob.value) _ob.value = _pr;
+    const _w = document.getElementById('ob-ref-wrap'); if (_w) _w.style.display = refLS('unlock') === 'grandfathered' ? 'none' : '';
     document.getElementById('onboard-panel').classList.add('show');
     setTimeout(() => { try { document.getElementById('ob-name').focus(); } catch(e){} }, 300);
   }
@@ -9329,8 +9360,13 @@ async function completeOnboarding() {
   // Keep the squad entry in step if they were renaming
   const sqNow = getSquad();
   if (sqNow && r === 'ok' && typeof sbReady === 'function' && sbReady()) squadUpsertMember(sqNow.id, name, getMyAvatarUrl());
+  // Who invited them (refer to unlock)
+  const _ref = cleanUsername((document.getElementById('ob-ref') || {}).value || '');
+  if (_ref && _ref.toLowerCase() !== name.toLowerCase() && !refLS('referrer') && refLS('unlock') !== 'grandfathered') refLS('referrer', _ref);
   document.getElementById('onboard-panel').classList.remove('show');
   checkPendingInvite();
+  // Sign in for chat/referrals now rather than at the next launch
+  if (typeof chatEnsureAuth === 'function') setTimeout(() => { if (typeof CHAT !== 'undefined' && CHAT.state === 'noname') CHAT.state = 'idle'; chatEnsureAuth(); }, 600);
 }
 
 let squadPollTimer = null;
@@ -10579,7 +10615,7 @@ function handleInviteCode(code) {
   openSquad();
   showConfirm('Join squad?', 'You\'ve been invited to a squad (code ' + code + ').', '', 'JOIN', () => squadJoin(code, getMemberName()));
 }
-function handleInviteUrl(url) { handleInviteCode(extractSquadCode(url)); }
+function handleInviteUrl(url) { handleRefFromLink(extractRef(url)); handleInviteCode(extractSquadCode(url)); }
 function checkPendingInvite() {
   let code = '';
   try { code = localStorage.getItem('fft.pendingJoin') || ''; localStorage.removeItem('fft.pendingJoin'); } catch (e) {}
@@ -10588,6 +10624,7 @@ function checkPendingInvite() {
 /* Startup: web (?join= / ?c=) or the Android app opened from a link */
 function initInviteLinks() {
   const q = new URLSearchParams(location.search);
+  if (q.get('ref')) setTimeout(() => handleRefFromLink(extractRef('?ref=' + q.get('ref'))), 600);
   const webCode = extractSquadCode('?c=' + (q.get('join') || q.get('c') || ''));
   if (webCode) {
     try { history.replaceState({}, '', location.pathname); } catch (e) {}
@@ -10617,6 +10654,165 @@ window.addEventListener('resize', () => {
     }
   }, 150);
 });
+
+/* =========================================================
+   REFER TO UNLOCK
+   - Free: 1 map of your own at a time (squad maps don't count).
+   - Invite one crewmate: when they pick a username and open a map,
+     you get unlimited maps for good.
+   - Everyone who used FFT before this update is unlocked already.
+   ========================================================= */
+const REF_FREE_MAPS = 1;
+function refLS(k, v) {
+  try {
+    if (v === undefined) return localStorage.getItem('fft.' + k);
+    if (v === null) localStorage.removeItem('fft.' + k); else localStorage.setItem('fft.' + k, String(v));
+  } catch (e) {}
+  return null;
+}
+// Existing users (already set up before this version) keep unlimited maps
+(function refInit() {
+  if (refLS('refInit')) return;
+  let recents = []; try { recents = JSON.parse(localStorage.getItem('fft.recents') || '[]'); } catch (e) {}
+  if (refLS('memberName') || recents.length) refLS('unlock', 'grandfathered');
+  refLS('refInit', '1');
+})();
+function mapsUnlocked() { return !!refLS('unlock'); }
+function refOwnMaps(exceptName) {
+  let list = []; try { list = JSON.parse(localStorage.getItem('fft.recents') || '[]'); } catch (e) {}
+  return list.filter(r => !r.squadMap && r.name !== exceptName);
+}
+function refCanAddMap(name) {
+  if (mapsUnlocked()) return true;
+  return refOwnMaps(name).length < REF_FREE_MAPS;
+}
+function refInviteUrl() {
+  return INVITE_PAGE + '?ref=' + encodeURIComponent(getMemberName() || '');
+}
+function refInviteText() {
+  return 'I use FFT (Forestry Field Tracker) for maps, tracking and the squad on site. Get it here and put @' +
+    getMemberName() + ' as who invited you: ' + refInviteUrl();
+}
+function refInviteWhatsApp() { openExternal('https://wa.me/?text=' + encodeURIComponent(refInviteText())); }
+async function refInviteShare() {
+  const payload = { title: 'Get FFT', text: refInviteText(), dialogTitle: 'Invite a crewmate' };
+  try {
+    if (isNativeApp() && window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('Share')) { await capPlugin('Share').share(payload); return; }
+    if (navigator.share) { await navigator.share(payload); return; }
+  } catch (e) { if (e && /cancel|abort/i.test(e.message || e.name || '')) return; }
+  refInviteCopy();
+}
+function refInviteCopy() {
+  copyText(refInviteText()).then(() => toast('Invite link copied', 'ok')).catch(() => toast(refInviteUrl(), 'info'));
+}
+function refStatus() { try { return JSON.parse(refLS('refStatus') || 'null') || {}; } catch (e) { return {}; } }
+
+/* The "you've hit the free limit" sheet */
+function showUnlockSheet() {
+  const st = refStatus(), own = refOwnMaps();
+  document.getElementById('ref-sheet-sub').innerHTML =
+    'Free accounts hold <b>' + REF_FREE_MAPS + ' map</b> at a time' + (own.length ? ' — you\'ve got <b>' + esc(own[0].name) + '</b>' : '') + '.<br>' +
+    '<b>Invite one crewmate</b> and you get <b>unlimited maps for good</b>.';
+  document.getElementById('ref-sheet-status').textContent = st.pending
+    ? st.pending + ' invited — it unlocks as soon as they pick a username and open a map.'
+    : 'It unlocks when they install FFT, put @' + getMemberName() + ' as who invited them, and open a map.';
+  document.getElementById('ref-backdrop').classList.add('show');
+  document.getElementById('ref-sheet').classList.add('show');
+  refSync();
+}
+function closeUnlockSheet() {
+  document.getElementById('ref-backdrop').classList.remove('show');
+  document.getElementById('ref-sheet').classList.remove('show');
+}
+function refManageMaps() { closeUnlockSheet(); bnHome(); toast('Delete a map from your library to make room', 'info'); }
+
+/* Talk to the server: who invited me, did my invite count, am I unlocked */
+let _refSyncing = false;
+async function refSync() {
+  if (_refSyncing || typeof CHAT === 'undefined' || !CHAT.uid) return;
+  _refSyncing = true;
+  try {
+    const who = refLS('referrer');
+    if (who && !refLS('referrerDone')) {
+      const { data, error } = await sb.rpc('fft_set_referrer', { p_username: who });
+      if (!error) {
+        if (data === 'not_found') { refLS('referrer', null); toast('Couldn\'t find @' + who + ' — you can add who invited you in Profile', 'info'); }
+        else if (data !== 'no_profile') refLS('referrerDone', '1');
+      }
+    }
+    if (refLS('referrerDone') && refLS('mapOpened') && !refLS('refCounted')) {
+      const { data, error } = await sb.rpc('fft_count_referral');
+      if (!error && data !== 'no_username') refLS('refCounted', '1');
+    }
+    const { data: st, error } = await sb.rpc('fft_my_unlock');
+    if (!error && st) {
+      const before = refStatus();
+      refLS('refStatus', JSON.stringify(st));
+      if (st.unlocked && !mapsUnlocked()) {
+        refLS('unlock', st.grandfathered ? 'grandfathered' : 'referral');
+        const names = (st.joined_names || []).map(n => '@' + n).join(', ');
+        toast('🎉 ' + (names ? names + ' joined from your invite — ' : '') + 'unlimited maps unlocked!', 'ok');
+        closeUnlockSheet();
+      } else if ((st.joined || 0) > (before.joined || 0) && before.joined !== undefined) {
+        toast('🎉 Another crewmate joined from your invite — cheers!', 'ok');
+      }
+      if (document.getElementById('settings-screen').classList.contains('show') && !PF_DRAFT) renderRefCard();
+    }
+  } catch (e) { console.warn('refSync', e); }
+  finally { _refSyncing = false; }
+}
+function refMapOpened() {
+  if (!refLS('mapOpened')) { refLS('mapOpened', '1'); refSync(); }
+}
+
+/* Invite links: join.html?ref=ross, fft://join?ref=ross */
+function extractRef(v) {
+  const m = String(v || '').match(/[?&]ref=@?([A-Za-z0-9_.]{3,20})/);
+  return m ? m[1] : '';
+}
+function handleRefFromLink(ref) {
+  if (!ref) return;
+  if (ref.toLowerCase() === (getMemberName() || '').toLowerCase()) return;
+  refLS('pendingRef', ref);
+  const ob = document.getElementById('ob-ref'); if (ob && !ob.value) ob.value = ref;
+  // Already set up and nobody recorded yet: use it
+  if (getMemberName() && !refLS('referrer') && refLS('unlock') !== 'grandfathered') {
+    refLS('referrer', ref); refSync();
+    toast('Thanks — @' + ref + ' will get the credit for inviting you', 'ok');
+  }
+}
+
+/* Profile card: maps plan + invite + who invited you */
+function renderRefCard() {
+  const el = document.getElementById('pf-ref'); if (!el) return;
+  const st = refStatus(), how = refLS('unlock');
+  let h = '<div class="ref-row"><div class="ref-ico">' + (mapsUnlocked() ? '∞' : '1') + '</div><div class="ref-mid">';
+  if (mapsUnlocked()) {
+    h += '<div class="ref-t">Unlimited maps</div><div class="ref-s">' +
+      (how === 'grandfathered' ? 'Thanks for being here early.' : (st.joined_names && st.joined_names.length ? 'Unlocked by inviting @' + esc(st.joined_names.join(', @')) + '.' : 'Unlocked — cheers for inviting a crewmate.')) + '</div>';
+  } else {
+    h += '<div class="ref-t">Free · 1 map at a time</div><div class="ref-s">Invite one crewmate for unlimited maps.' +
+      (st.pending ? ' ' + st.pending + ' invited — waiting for them to open a map.' : '') + '</div>';
+  }
+  h += '</div></div>';
+  h += '<div class="ref-btns"><button class="ref-btn lime" onclick="refInviteWhatsApp()">Invite on WhatsApp</button><button class="ref-btn" onclick="refInviteShare()">Share link</button></div>';
+  const invitedBy = st.invited_by || (refLS('referrerDone') ? refLS('referrer') : '');
+  if (invitedBy) h += '<div class="ref-by">Invited by @' + esc(invitedBy) + '</div>';
+  else if (how !== 'grandfathered' && !refLS('referrer')) {
+    h += '<div class="ref-by-form"><div class="pf-at-wrap"><span>@</span><input id="ref-by-input" class="pf-input pf-at" maxlength="21" placeholder="Who invited you? (optional)" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"/></div>' +
+      '<button class="ref-btn" onclick="refSaveInvitedBy()">Save</button></div>';
+  }
+  el.innerHTML = h;
+}
+function refSaveInvitedBy() {
+  const v = cleanUsername((document.getElementById('ref-by-input') || {}).value || '');
+  if (!v) return;
+  if (v.toLowerCase() === (getMemberName() || '').toLowerCase()) { toast('That\'s you!', 'info'); return; }
+  refLS('referrer', v); refLS('referrerDone', null);
+  toast('Saved — @' + v + ' gets the credit', 'ok');
+  renderRefCard();
+  if (typeof chatEnsureAuth === 'function') chatEnsureAuth().then(ok => { if (ok) refSync(); });
+}
 
 /* =========================================================
    CHAT + FRIENDS
@@ -10675,6 +10871,7 @@ function chatEnsureAuth() {
       chatSetState('ready');
       await chatSyncProfile();
       await chatJoinSquadChat();
+      refSync();
       chatSubscribe();
       chatLoadConvs();
       chatLoadFriends();
@@ -11556,11 +11753,12 @@ async function chatPushInit() {
     await PN.addListener('registrationError', e => console.warn('push register', e));
     // Tapped a notification: open that chat
     await PN.addListener('pushNotificationActionPerformed', a => {
-      const cid = a && a.notification && a.notification.data && a.notification.data.conv;
-      if (cid) chatOpenFromPush(cid);
+      const d = (a && a.notification && a.notification.data) || {};
+      if (d.unlock) { refSync(); setTimeout(openSettings, 600); }
+      if (d.conv) chatOpenFromPush(d.conv);
     });
     // In the app already: realtime shows it, nothing to do
-    await PN.addListener('pushNotificationReceived', () => {});
+    await PN.addListener('pushNotificationReceived', n => { if (n && n.data && n.data.unlock) refSync(); });
     try { await PN.createChannel({ id: 'chat', name: 'Chat messages', description: 'Messages from friends, groups and your squad', importance: 4, visibility: 1, vibration: true }); } catch (e) {}
     let perm = await PN.checkPermissions();
     if (perm.receive === 'prompt' || perm.receive === 'prompt-with-rationale') perm = await PN.requestPermissions();
@@ -11756,6 +11954,17 @@ setTimeout(() => {
 <div class="sheet-backdrop" id="ch-sheet-backdrop" onclick="closeChatSheet()"></div>
 <div class="action-sheet" id="ch-sheet"></div>
 <div id="cc-viewer" onclick="this.classList.remove('show')"><img id="cc-viewer-img" alt=""/></div>
+<div class="sheet-backdrop" id="ref-backdrop" onclick="closeUnlockSheet()"></div>
+<div class="action-sheet" id="ref-sheet">
+  <div class="ref-hero">🗺️</div>
+  <div class="ref-title">Unlock unlimited maps</div>
+  <div id="ref-sheet-sub"></div>
+  <div id="ref-sheet-status"></div>
+  <button class="ref-btn lime" onclick="refInviteWhatsApp()">Invite a crewmate on WhatsApp</button>
+  <button class="ref-btn" onclick="refInviteShare()">Share invite link</button>
+  <button class="ref-btn" onclick="refManageMaps()">Swap maps instead (delete one)</button>
+  <button class="as-btn cancel" onclick="closeUnlockSheet()">Not now</button>
+</div>
 <div id="update-banner" role="status">
   <div class="ub-text"><div class="ub-title" id="ub-title"></div><div class="ub-sub" id="ub-sub"></div></div>
   <button class="ub-go" id="ub-go"></button>
@@ -11788,6 +11997,7 @@ setTimeout(() => {
         <div class="pf-stat"><div class="pf-stat-n" id="pf-stat-shared">–</div><div class="pf-stat-l">Shared</div></div>
         <div class="pf-stat"><div class="pf-stat-n" id="pf-stat-ha">–</div><div class="pf-stat-l">Hectares</div></div>
       </div>
+      <div id="pf-ref"></div>
       <div class="settings-section">
         <div class="settings-section-label">Settings</div>
         <div class="settings-row">
