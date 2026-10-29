@@ -2653,6 +2653,13 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
 #ref-sheet .ref-btn{display:block;width:100%;margin-bottom:8px;padding:14px;font-size:14.5px;}
 #ob-ref-wrap{width:100%;margin:-4px 0 14px;}
 #ob-ref-wrap .ob-input{margin-bottom:0;}
+
+.wl-av{background:#0a100d !important;border-color:var(--leaf) !important;}
+.wl-av svg{width:60%;height:auto;}
+.wl-card{max-width:290px;}
+.wl-btns{display:flex;gap:8px;margin-top:10px;}
+.wl-btns .ref-btn{padding:10px 8px;font-size:12.5px;}
+.wl-link{font-size:11px;color:var(--text-faint);margin-top:8px;word-break:break-all;}
 </style>
 </head>
 <body>
@@ -11043,6 +11050,7 @@ function openChat() {
   chatEnsureAuth().then(ok => { if (ok) { chatSetState('ready'); chatLoadConvs(); chatLoadFriends(); } });
 }
 function chatCloseAll() {
+  closeWelcomeIfOpen();
   ['chat-screen', 'chat-conv', 'friends-screen', 'chat-new'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('show'); });
   CHAT.openId = null;
   closeChatSheet();
@@ -11054,28 +11062,84 @@ function chatTopLayer() {
 }
 function renderChatList() {
   const el = document.getElementById('ch-list'); if (!el) return;
+  const wl = welcomeRowHtml(), wlTop = welcomeUnread();
   if (!CHAT.convs.length) {
-    el.innerHTML = '<div class="ch-empty"><b>No chats yet</b>Add friends by their username, or join a squad — every squad gets its own group chat.' +
+    el.innerHTML = wl + '<div class="ch-empty"><b>No chats yet</b>Add friends by their username, or join a squad — every squad gets its own group chat.' +
       '<div class="ch-btns" style="justify-content:center;margin-top:16px"><button class="ch-btn lime" onclick="openFriends()">Add friends</button>' +
       '<button class="ch-btn" onclick="openNewChat(\'group\')">New group</button></div></div>';
     return;
   }
-  el.innerHTML = CHAT.convs.map(c => {
+  el.innerHTML = (wlTop ? wl : '') + CHAT.convs.map(c => {
     const un = c.unread > 0;
     const tag = c.kind === 'squad' ? '<span class="ch-tag">SQUAD</span>' : c.kind === 'group' ? '<span class="ch-tag">GROUP</span>' : '';
     return '<div class="ch-row' + (un ? ' unread' : '') + '" onclick="openConv(\'' + c.id + '\')">' + chatConvAvatar(c) +
       '<div class="ch-mid"><div class="ch-name">' + esc(chatConvName(c)) + tag + '</div>' +
       '<div class="ch-prev">' + esc(c.last_message_preview || (c.kind === 'dm' ? 'Say hello 👋' : c.member_count + ' member' + (c.member_count === 1 ? '' : 's'))) + '</div></div>' +
       '<div class="ch-right"><div class="ch-time">' + chatTime(c.last_message_at) + '</div>' + (un ? '<div class="ch-count">' + (c.unread > 99 ? '99+' : c.unread) + '</div>' : '') + '</div></div>';
-  }).join('');
+  }).join('') + (wlTop ? '' : wl);
 }
 function chatUpdateBadges() {
-  const unread = CHAT.convs.reduce((a, c) => a + (c.unread > 0 ? c.unread : 0), 0);
+  const unread = CHAT.convs.reduce((a, c) => a + (c.unread > 0 ? c.unread : 0), 0) + (welcomeUnread() ? 1 : 0);
   const reqs = chatIncoming().length;
   const n = unread + reqs;
   document.querySelectorAll('.bn-badge').forEach(b => { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('show', n > 0); });
   const d = document.getElementById('ch-fr-dot');
   if (d) { d.textContent = reqs; d.style.display = reqs ? 'flex' : 'none'; }
+}
+
+/* ---------- Welcome message (lives on the phone, shows in the chat inbox) ---------- */
+const FFT_LOGO_SVG = '<svg viewBox="0 0 100 120" width="26" height="30"><path d="M50 4C26 4 10 21 10 43c0 24 40 72 40 72s40-48 40-72C90 21 74 4 50 4z" fill="#d9ff4f"/><circle cx="50" cy="42" r="26" fill="#060905"/><g fill="#c9f56f"><polygon points="50,22 40,37 60,37"/><polygon points="50,30 35,49 65,49"/><polygon points="50,40 30,63 70,63"/></g></svg>';
+function welcomeTs() {
+  let t = refLS('welcomeTs');
+  if (!t) { t = new Date().toISOString(); refLS('welcomeTs', t); }
+  return t;
+}
+function welcomeHidden() { return !!refLS('welcomeHidden'); }
+function welcomeUnread() { return !welcomeHidden() && !refLS('welcomeRead') && !!getMemberName(); }
+function welcomeRowHtml() {
+  if (welcomeHidden() || !getMemberName()) return '';
+  const un = welcomeUnread();
+  return '<div class="ch-row' + (un ? ' unread' : '') + '" onclick="openWelcome()">' +
+    '<div class="ch-av sq wl-av">' + FFT_LOGO_SVG + '</div>' +
+    '<div class="ch-mid"><div class="ch-name">Forestry Field Tracker<span class="ch-tag">FFT</span></div>' +
+    '<div class="ch-prev">👋 Welcome to FFT — ' + (mapsUnlocked() ? 'invite your crew' : 'refer a friend for unlimited maps') + '</div></div>' +
+    '<div class="ch-right"><div class="ch-time">' + chatTime(welcomeTs()) + '</div>' + (un ? '<div class="ch-count">1</div>' : '') + '</div></div>';
+}
+function welcomeBubbles() {
+  const name = getMemberName();
+  const b = (t, last) => '<div class="cm' + (last ? ' first' : '') + '"><div class="ch-av sm sq wl-av">' + FFT_LOGO_SVG + '</div><div class="cm-col"><div class="cm-b">' + t + '</div></div></div>';
+  const gift = mapsUnlocked()
+    ? '🎁 <b>You\'ve got unlimited maps</b>' + (refLS('unlock') === 'grandfathered' ? ' — thanks for being here early.' : '.') + ' Know someone who\'d use FFT? Send them your link:'
+    : '🎁 <b>Refer a friend, get unlimited maps.</b> Free accounts hold 1 map at a time. When someone you invite sets up FFT and opens a map, you get unlimited maps for good.';
+  return '<div class="cm-day">' + chatTime(welcomeTs()) + '</div>' +
+    '<div class="cm-who" style="color:var(--leaf);margin-left:46px">Forestry Field Tracker</div>' +
+    b('👋 Welcome to <b>Forestry Field Tracker</b>' + (name ? ', @' + esc(name) : '') + '!') +
+    b('FFT is a <b>free map navigator and tracker built for forestry</b>. Open your GeoPDF maps, see exactly where you are, track the ground you\'ve covered, walk boundaries in Border Mode, and share it all with your squad.') +
+    b('It\'s a <b>work in progress</b>, built by a working forestry contractor, so new features land often and the app updates itself. If something\'s not right, it\'ll get fixed.') +
+    '<div class="cm"><div class="ch-av sm sq wl-av">' + FFT_LOGO_SVG + '</div><div class="cm-col"><div class="cm-b wl-card">' + gift +
+      '<div class="wl-btns"><button class="ref-btn lime" onclick="refInviteWhatsApp()">Invite on WhatsApp</button><button class="ref-btn" onclick="refInviteShare()">Share link</button></div>' +
+      '<div class="wl-link">Your link: ' + esc(refInviteUrl().replace(/^https:\/\//, '')) + '</div></div></div></div>' +
+    b('<b>Getting started</b><br>🗺️ <b>Home</b> → open a map<br>👥 <b>Squad</b> → join or start your crew<br>💬 <b>Chat</b> → message your squad, send pins and photos<br>👤 <b>Profile</b> → your tickets, experience and invite link', true) +
+    '<div class="cm-meta" style="margin-left:46px">' + new Date(welcomeTs()).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '</div>';
+}
+function openWelcome() {
+  CHAT.openId = null; CHAT.welcomeOpen = true;
+  refLS('welcomeRead', '1');
+  const av = document.getElementById('cc-av');
+  av.outerHTML = '<div id="cc-av" class="ch-av sm sq wl-av">' + FFT_LOGO_SVG + '</div>';
+  document.getElementById('cc-title').textContent = 'Forestry Field Tracker';
+  document.getElementById('cc-sub').textContent = 'Welcome · from the FFT team';
+  document.getElementById('cc-list').innerHTML = welcomeBubbles();
+  document.querySelector('#chat-conv .cc-bar').style.display = 'none';
+  document.getElementById('chat-conv').classList.add('show');
+  document.getElementById('cc-body').scrollTop = 0;
+  chatUpdateBadges(); renderChatList();
+}
+function closeWelcomeIfOpen() {
+  if (!CHAT.welcomeOpen) return false;
+  CHAT.welcomeOpen = false;
+  document.querySelector('#chat-conv .cc-bar').style.display = '';
+  return true;
 }
 
 /* ---------- people ---------- */
@@ -11156,6 +11220,7 @@ window.addEventListener('online', () => setTimeout(() => { if (CHAT.uid) chatFlu
 
 /* ---------- opening a conversation ---------- */
 function openConv(cid) {
+  closeWelcomeIfOpen();
   CHAT.openId = cid;
   const c = chatConv(cid);
   if (c) c.unread = 0;
@@ -11178,6 +11243,7 @@ async function chatPeopleForConv(cid) {
   } catch (e) {}
 }
 function closeConv() {
+  closeWelcomeIfOpen();
   document.getElementById('chat-conv').classList.remove('show');
   CHAT.openId = null;
   renderChatList();
@@ -11196,6 +11262,7 @@ function renderConvHeader() {
   document.getElementById('cc-sub').textContent = sub;
 }
 function convHeaderTap() {
+  if (CHAT.welcomeOpen) return;
   const c = chatConv(CHAT.openId); if (!c) return;
   if (c.kind === 'dm') chatOpenProfile(c.other_id);
   else convMembers();
@@ -11428,6 +11495,13 @@ async function onConvPhoto(file) {
 
 /* ---------- conversation menus ---------- */
 function convMenu() {
+  if (CHAT.welcomeOpen) {
+    chatSheet({ title: 'Forestry Field Tracker', items: [
+      { label: 'Invite a friend', fn: refInviteShare },
+      { label: 'Delete this message', danger: true, fn: () => { refLS('welcomeHidden', '1'); closeConv(); chatUpdateBadges(); } }
+    ] });
+    return;
+  }
   const c = chatConv(CHAT.openId); if (!c) return;
   if (c.kind === 'dm') {
     const blocked = CHAT.blocked.has(c.other_id);
@@ -11531,7 +11605,8 @@ function renderFriends() {
   const acc = CHAT.friendships.filter(f => f.status === 'accepted');
   const friendIds = new Set(CHAT.friendships.map(chatOther));
   const mates = CHAT.contacts.filter(p => p.is_squadmate && !friendIds.has(p.id));
-  let h = '';
+  let h = '<div class="ch-row" onclick="refInviteShare()"><div class="ch-av sq wl-av">' + FFT_LOGO_SVG + '</div><div class="ch-mid"><div class="ch-name">Invite a crewmate to FFT</div><div class="ch-prev">' +
+    (mapsUnlocked() ? 'Send them your link' : 'Get unlimited maps when they join') + '</div></div><div class="ch-btns" onclick="event.stopPropagation()"><button class="ch-btn lime" onclick="refInviteWhatsApp()">WhatsApp</button></div></div>';
   if (inc.length) h += '<div class="ch-sec">Friend requests</div>' + inc.map(f => chatPersonRow(f.requester,
     '<button class="ch-btn lime" onclick="friendRespond(\'' + f.id + '\',true)">Accept</button><button class="ch-btn" onclick="friendRespond(\'' + f.id + '\',false)">Decline</button>', 'Wants to be friends')).join('');
   h += '<div class="ch-sec">Friends' + (acc.length ? ' · ' + acc.length : '') + '</div>';
