@@ -483,6 +483,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .settings-row-sub{
   font-size:12px;color:var(--text-faint);line-height:1.4;
 }
+/* ---- Open-map chooser (above the Squad panel) ---- */
+#mo-backdrop{z-index:900;}
+#mo-sheet{z-index:901;}
+.mo-btn{align-items:center;text-align:left;}
+.mo-hint{font-size:11px;font-weight:500;color:var(--text-faint);margin-top:2px;}
+.rc-squad-tag{display:inline-block;margin-right:6px;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:800;letter-spacing:0.5px;
+  background:rgba(217,255,79,0.14);color:var(--leaf);vertical-align:middle;}
 /* ---- Member profile sheet (above the Squad panel) ---- */
 #mp-backdrop{z-index:900;}
 #mp-sheet{z-index:901;padding:18px 18px 12px;max-height:80vh;overflow-y:auto;}
@@ -514,6 +521,40 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .ub-sub{font-size:12px;color:var(--text-dim);margin-top:2px;line-height:1.35;}
 .ub-go{padding:10px 14px;border-radius:12px;border:none;background:var(--leaf);color:#0a0d0c;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap;}
 .ub-x{width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.07);color:var(--text-dim);font-size:14px;cursor:pointer;flex-shrink:0;}
+/* ---- Profile page + editor ---- */
+#settings-screen .settings-header{position:relative;}
+.pf-hbtn{position:absolute;top:50%;transform:translateY(-35%);display:none;padding:8px 12px;border-radius:10px;border:none;
+  background:transparent;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+.pf-hbtn-l{left:10px;color:var(--text-dim);}
+.pf-hbtn-r{right:10px;color:#0a0d0c;background:var(--leaf);}
+.pf-hbtn:disabled{opacity:0.6;}
+#pf-edit{display:none;}
+#settings-screen.pf-editing #pf-view{display:none;}
+#settings-screen.pf-editing #pf-edit{display:block;}
+#settings-screen.pf-editing .pf-hbtn{display:block;}
+#settings-screen.pf-editing .bottom-nav{display:none;}
+.pf-hero{position:relative;overflow:hidden;text-align:center;padding:0 18px 20px;margin-bottom:14px;border-radius:22px;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(217,255,79,0.18);}
+.pf-cover{height:86px;margin:0 -18px;background:
+  radial-gradient(ellipse at 30% 120%, rgba(217,255,79,0.35), transparent 60%),
+  repeating-radial-gradient(circle at 70% 140%, rgba(217,255,79,0.16) 0 1px, transparent 1px 14px),
+  linear-gradient(180deg,#1b2e12,#0d150a);}
+.pf-avatar-lg{width:104px;height:104px;margin:-52px auto 10px;border:3px solid var(--leaf);background:#0d150a;}
+.pf-avatar-lg #pf-avatar-fallback,.pf-avatar-lg #pf-edit-avatar-fallback{font-size:42px;}
+.pf-avatar-lg img{display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;}
+#pf-edit .pf-avatar-lg{margin:14px auto 6px;}
+.pf-avatar-label{text-align:center;font-size:11px;color:var(--text-faint);margin-bottom:18px;font-weight:600;}
+.pf-handle{font-size:22px;}
+.pf-empty-hint{font-size:13px;color:var(--text-faint);line-height:1.45;margin:12px auto 0;max-width:280px;}
+.pf-edit-btn{margin-top:16px;padding:11px 26px;border-radius:999px;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;
+  background:rgba(217,255,79,0.12);border:1px solid rgba(217,255,79,0.45);color:var(--leaf);}
+.pf-stats{display:flex;gap:8px;margin-bottom:24px;}
+.pf-stat{flex:1;text-align:center;padding:12px 6px;border-radius:14px;background:var(--panel);border:1px solid var(--border);}
+.pf-stat-n{font-family:'Manrope',sans-serif;font-weight:800;font-size:20px;color:var(--text);}
+.pf-stat-l{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);font-weight:700;margin-top:2px;}
+.pf-save-big{display:block;width:100%;margin:4px 0 30px;padding:15px;border-radius:14px;border:none;font-family:inherit;font-weight:800;font-size:15px;
+  background:var(--leaf);color:#0a0d0c;cursor:pointer;}
+.pf-hint.ok{color:var(--leaf);}
 /* ---- Squad invite buttons ---- */
 .sq-inv-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 6px;border-radius:12px;
   background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;}
@@ -1220,6 +1261,16 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   width:auto;
 }
 #tool-menu.show{display:flex;animation:menuIn 220ms cubic-bezier(.2,.9,.3,1.1);}
+/* Two pages: the arrow swaps page 1 for page 2 in the same spot */
+#tm-more{display:none;flex-direction:column;gap:8px;align-items:flex-end;}
+#tool-menu.more-open > *:not(#tm-more-btn):not(#tm-more){display:none !important;}
+#tool-menu.more-open #tm-more{display:flex;animation:tmPageIn 200ms ease-out;}
+#tool-menu.more-open #tm-more-btn{order:-1;}
+#tool-menu:not(.more-open).paged > *:not(#tm-more){animation:tmPageBack 200ms ease-out;}
+@keyframes tmPageIn{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+@keyframes tmPageBack{from{opacity:0;transform:translateY(-24px);}to{opacity:1;transform:none;}}
+.tm-more-chev{transition:transform 180ms;}
+#tool-menu.more-open .tm-more-chev{transform:rotate(180deg);}
 @keyframes menuIn{from{opacity:0;transform:translateY(-12px) scale(0.96);}to{opacity:1;transform:translateY(0) scale(1);}}
 
 .tm-btn{
@@ -2479,6 +2530,105 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
 #border-controls .b-sound{background:rgba(217,255,79,0.15);color:var(--leaf);border-color:rgba(217,255,79,0.3);}
 #border-controls .b-sound.muted{opacity:0.5;}
 #border-controls .b-exit{background:rgba(255,74,58,0.15);color:var(--red);border-color:rgba(255,74,58,0.3);}
+/* =========================================================
+   CHAT + FRIENDS
+   ========================================================= */
+.chat-layer{position:fixed;inset:0;display:none;flex-direction:column;color:var(--text);
+  background:radial-gradient(ellipse at 50% -10%, #14241c 0%, #0a100d 55%, #06090a 100%);}
+.chat-layer.show{display:flex;}
+#chat-screen{z-index:31;}
+#chat-conv{z-index:33;}
+#friends-screen{z-index:34;}
+#chat-new{z-index:35;}
+.ch-head{display:flex;align-items:center;gap:8px;padding:12px 12px 10px;padding-top:max(env(safe-area-inset-top,12px),12px);
+  border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(8,12,10,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.ch-title{flex:1;min-width:0;font-family:'Manrope',sans-serif;font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ch-title.center{text-align:center;letter-spacing:3px;font-size:16px;color:var(--leaf);text-shadow:0 0 14px rgba(217,255,79,0.45);}
+.ch-sub{font-size:11px;color:var(--text-faint);font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ch-ibtn{position:relative;flex-shrink:0;min-width:40px;height:40px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.05);color:var(--text);display:flex;align-items:center;justify-content:center;gap:6px;
+  font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;}
+.ch-ibtn.lime{background:var(--leaf);color:#0a0d0c;border-color:var(--leaf);}
+.ch-dot{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#ff4a3a;color:#fff;
+  font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #0a100d;}
+.ch-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.ch-status{margin:12px;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.4;background:rgba(255,170,0,0.08);
+  border:1px solid rgba(255,170,0,0.3);color:#ffcf70;}
+.ch-status:empty{display:none;}
+.ch-empty{text-align:center;color:var(--text-faint);font-size:13px;line-height:1.5;padding:50px 30px;}
+.ch-empty b{display:block;color:var(--text);font-size:16px;margin-bottom:6px;}
+.ch-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;}
+.ch-row:active{background:rgba(255,255,255,0.04);}
+.ch-av{width:46px;height:46px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  font-weight:800;font-size:18px;border:2px solid var(--leaf);background:rgba(217,255,79,0.08);color:var(--leaf);}
+.ch-av img{width:100%;height:100%;object-fit:cover;}
+.ch-av.sm{width:34px;height:34px;font-size:13px;border-width:1.5px;}
+.ch-av.sq{border-radius:14px;}
+.ch-mid{flex:1;min-width:0;}
+.ch-name{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ch-prev{font-size:13px;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.ch-row.unread .ch-prev{color:var(--text);font-weight:600;}
+.ch-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.ch-time{font-size:11px;color:var(--text-faint);}
+.ch-row.unread .ch-time{color:var(--leaf);font-weight:700;}
+.ch-count{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--leaf);color:#0a0d0c;font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;}
+.ch-tag{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:800;letter-spacing:0.5px;
+  background:rgba(217,255,79,0.14);color:var(--leaf);vertical-align:middle;}
+.ch-sec{padding:16px 14px 6px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-faint);}
+.ch-btn{padding:8px 12px;border-radius:10px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);color:var(--text);flex-shrink:0;}
+.ch-btn.lime{background:rgba(217,255,79,0.14);border-color:rgba(217,255,79,0.45);color:var(--leaf);}
+.ch-btn.red{background:rgba(255,74,58,0.08);border-color:rgba(255,74,58,0.35);color:#ff6b5b;}
+.ch-btns{display:flex;gap:6px;}
+.fr-add{display:flex;gap:8px;padding:14px;}
+.fr-add .pf-at-wrap{flex:1;}
+/* conversation */
+#cc-list{padding:10px 10px 16px;}
+.cm{display:flex;gap:8px;margin:2px 0;align-items:flex-end;}
+.cm.me{justify-content:flex-end;}
+.cm .ch-av{visibility:hidden;}
+.cm.first .ch-av{visibility:visible;}
+.cm-col{max-width:78%;display:flex;flex-direction:column;}
+.cm.me .cm-col{align-items:flex-end;}
+.cm-who{font-size:11px;font-weight:700;margin:6px 0 2px 4px;}
+.cm-b{padding:9px 12px;border-radius:18px;font-size:15px;line-height:1.35;white-space:pre-wrap;word-break:break-word;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06);}
+.cm.me .cm-b{background:var(--leaf);color:#0a0d0c;border-color:transparent;}
+.cm-meta{font-size:10px;color:var(--text-faint);margin:2px 6px 4px;}
+.cm-meta.fail{color:#ff6b5b;font-weight:700;cursor:pointer;}
+.cm-pin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;cursor:pointer;min-width:200px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(217,255,79,0.35);color:var(--text);}
+.cm.me .cm-pin{background:rgba(217,255,79,0.16);}
+.cm-pin-ico{width:34px;height:34px;border-radius:10px;background:var(--leaf);color:#0a0d0c;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cm-pin-t{font-weight:800;font-size:14px;}
+.cm-pin-s{font-size:11px;color:var(--text-faint);margin-top:1px;}
+.cm-photo{display:block;max-width:230px;max-height:300px;border-radius:16px;cursor:pointer;background:rgba(255,255,255,0.05);}
+.cm-photo.pending{opacity:0.6;}
+.cm-day{text-align:center;font-size:11px;color:var(--text-faint);font-weight:700;margin:14px 0 6px;}
+.cc-more{display:block;margin:4px auto 10px;}
+.cc-bar{display:flex;align-items:flex-end;gap:8px;padding:8px 10px calc(env(safe-area-inset-bottom,0px) + 8px);
+  border-top:1px solid rgba(255,255,255,0.08);background:rgba(8,12,10,0.95);}
+.cc-bar textarea{flex:1;resize:none;max-height:120px;min-height:40px;padding:10px 14px;border-radius:20px;font-family:inherit;font-size:15px;line-height:1.3;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--text);outline:none;}
+.cc-ib{width:40px;height:40px;border-radius:50%;border:none;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:rgba(255,255,255,0.07);color:var(--leaf);}
+.cc-ib.send{background:var(--leaf);color:#0a0d0c;}
+.cc-note{text-align:center;font-size:12px;color:var(--text-faint);padding:12px;}
+#cc-viewer{position:fixed;inset:0;z-index:950;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;}
+#cc-viewer.show{display:flex;}
+#cc-viewer img{max-width:100%;max-height:100%;}
+/* new chat / group */
+.cn-pick{width:22px;height:22px;border-radius:7px;border:2px solid rgba(255,255,255,0.25);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#0a0d0c;font-weight:900;font-size:13px;}
+.ch-row.on .cn-pick{background:var(--leaf);border-color:var(--leaf);}
+#ch-sheet-backdrop{z-index:902;}
+#ch-sheet{z-index:903;max-height:75vh;overflow-y:auto;}
+.bn-badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#ff4a3a;color:#fff;
+  font-size:9.5px;font-weight:800;display:none;align-items:center;justify-content:center;border:1.5px solid #0a100d;}
+.bn-badge.show{display:flex;}
+#mp-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;}
+#mp-actions:empty{display:none;}
+#mp-actions .ch-btn{flex:1;padding:11px 10px;font-size:13px;}
 </style>
 </head>
 <body>
@@ -2765,6 +2915,18 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
           </svg>
         </span>
       </button>
+      <div class="tm-divider" id="tm-comp-section" style="display:none;">
+        COMPARTMENTS
+        <div id="tm-comp-list" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+      </div>
+      <!-- Page arrow: swaps to the next lot of options (and back) -->
+      <button class="tm-btn tm-more-btn" id="tm-more-btn" onclick="toggleToolMore()" aria-expanded="false">
+        <span id="tm-more-label">More</span>
+        <span class="tm-ico">
+          <svg class="tm-more-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div id="tm-more">
       <!-- Reset calibration: only visible when calibration is set -->
       <button class="tm-btn" id="tm-reset-cal" onclick="resetCalibration()" style="display:none;">
         <span>Reset calibration</span>
@@ -2786,13 +2948,9 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
           </svg>
         </span>
       </button>
-      <div class="tm-divider" id="tm-comp-section" style="display:none;">
-        COMPARTMENTS
-        <div id="tm-comp-list" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
-      </div>
       <!-- Clear buttons removed — tap any line/sketch/area on map to delete -->
       <button class="tm-btn" id="tm-squad-send" onclick="sendToSquad()">
-        <span>Share map to squad</span>
+        <span>Share to squad</span>
         <span class="tm-ico">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 2L11 13"/>
@@ -2800,21 +2958,14 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
           </svg>
         </span>
       </button>
-      <button class="tm-btn" id="tm-squad-show" onclick="hideToolMenu(); setSquadShowPref(!squadShowPref())">
-        <span id="tm-squad-show-label">Squad on map: on</span>
+      <button class="tm-btn" id="tm-squad-show" onclick="hideToolMenu(); toggleSquadView()">
+        <span id="tm-squad-show-label">Hide squad</span>
         <span class="tm-ico">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </span>
       </button>
-      <button class="tm-btn" id="tm-account" onclick="openAccountScreen()">
-        <span id="tm-account-label">Account &amp; Team</span>
-        <span class="tm-ico">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-        </span>
-      </button>
+      </div>
+
     </div>
 
     <!-- Mode pill: Tap / Draw -->
@@ -3017,6 +3168,10 @@ body:has(#border-controls.active) #fab-stack{bottom:calc(env(safe-area-inset-bot
           </svg>
         </span>
         <span class="bn-label">Squad</span>
+      </button>
+      <button class="bn-btn" id="bn-chat" onclick="openChat()">
+        <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="bn-label">Chat</span><span class="bn-badge"></span>
       </button>
       <button class="bn-btn" id="bn-settings" onclick="openSettings()">
         <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
@@ -3834,7 +3989,7 @@ async function onFilePicked(file) {
   try { document.getElementById('file-input').value = ''; } catch(e){}
   if (!file) return;
   if (typeof pdfjsLib === 'undefined') { toast('PDF engine failed to load', 'err'); return; }
-  APP.squadMapId = null;
+  APP.squadMapId = null; APP.viewMode = null;
   stopSquadMapOverlay();
   try {
     const buf = await file.arrayBuffer();
@@ -3877,6 +4032,9 @@ async function loadPdfFromBuffer(buf, name, size, restoreState) {
     return;
   }
   APP.fwd = geo.fwd; APP.inv = geo.inv;
+  APP.geoInfo = geo.geoInfo || null;
+  if (APP.geoInfo && APP.geoInfo.converted) setTimeout(() => toast('Map is in ' + APP.geoInfo.datum + ' — converted to GPS coordinates', 'ok'), 900);
+  else if (APP.geoInfo && !APP.geoInfo.known) setTimeout(() => toast('Map uses ' + APP.geoInfo.datum + ' — your position may be offset. Use Calibrate if it is.', 'err'), 900);
 
   // Render canvas
   const canvas = document.getElementById('pdf-canvas');
@@ -3953,9 +4111,142 @@ async function loadPdfFromBuffer(buf, name, size, restoreState) {
 
   // Load any photo pins for this map
   loadPhotoPins();
-  // Squadmates' tracks, pins and drawings on this map too
-  if (getSquad() && squadShowPref()) startSquadMapOverlay(null);
+  // Squadmates' tracks, pins and drawings on this map too (not in "my map" mode)
+  if (getSquad() && squadShowPref() && APP.viewMode !== 'mine') startSquadMapOverlay(APP.squadMapId || null);
   loadWaypoints();
+}
+
+/* =========================================================
+   GEOPDF GEOREFERENCING
+   Reads the map's own coordinate system and converts it to GPS
+   (WGS84) coordinates. Ordnance Survey maps are often in OSGB36,
+   which sits ~70-120 m away from GPS positions in Scotland — the
+   app used to ignore that and put your dot that far off.
+   ========================================================= */
+function pdfBytesToText(data) {
+  const len = data.length;
+  try {
+    if (len <= 120 * 1024 * 1024) return new TextDecoder('latin1').decode(data);
+  } catch (e) {}
+  // Huge file / no TextDecoder: just the start and end, where map info usually lives
+  const part = (a, b) => { let t = ''; for (let i = a; i < b; i++) t += String.fromCharCode(data[i]); return t; };
+  const H = Math.min(len, 2000000);
+  return part(0, H) + (len > H ? part(Math.max(H, len - 2000000), len) : '');
+}
+
+// --- datum conversion (Helmert 7-parameter, accurate to a few metres) ---
+const DATUMS = {
+  // OSGB36 → WGS84, Ordnance Survey published parameters (position vector)
+  osgb36: { name: 'OSGB36 (Ordnance Survey)', a: 6377563.396, b: 6356256.909,
+            t: [446.448, -125.157, 542.060], r: [0.1502, 0.2470, 0.8421], s: -20.4894 },
+};
+function geoToCart(latD, lonD, a, b) {
+  const e2 = 1 - (b * b) / (a * a), φ = latD * Math.PI / 180, λ = lonD * Math.PI / 180;
+  const ν = a / Math.sqrt(1 - e2 * Math.sin(φ) ** 2);
+  return [ν * Math.cos(φ) * Math.cos(λ), ν * Math.cos(φ) * Math.sin(λ), (1 - e2) * ν * Math.sin(φ)];
+}
+function cartToGeo(x, y, z, a, b) {
+  const e2 = 1 - (b * b) / (a * a), p = Math.sqrt(x * x + y * y);
+  let φ = Math.atan2(z, p * (1 - e2)), prev = 2 * Math.PI;
+  for (let i = 0; i < 10 && Math.abs(φ - prev) > 1e-12; i++) {
+    const ν = a / Math.sqrt(1 - e2 * Math.sin(φ) ** 2);
+    prev = φ; φ = Math.atan2(z + e2 * ν * Math.sin(φ), p);
+  }
+  return [φ * 180 / Math.PI, Math.atan2(y, x) * 180 / Math.PI];
+}
+function toWgs84(lat, lon, d) {
+  const [x, y, z] = geoToCart(lat, lon, d.a, d.b);
+  const sec = Math.PI / (180 * 3600), [rx, ry, rz] = d.r.map(v => v * sec), s1 = 1 + d.s / 1e6, [tx, ty, tz] = d.t;
+  const x2 = tx + s1 * x - rz * y + ry * z, y2 = ty + rz * x + s1 * y - rx * z, z2 = tz - ry * x + rx * y + s1 * z;
+  return cartToGeo(x2, y2, z2, 6378137.0, 6356752.314245);
+}
+/* Which datum is the map in? Returns {datum|null, label, known:boolean} */
+function detectDatum(wkt, epsg) {
+  const w = String(wkt || '');
+  const e = +epsg || 0;
+  if ([27700, 4277, 7405, 27701, 27702].includes(e) || /OSGB|Airy[ _]?1830|Ordnance[ _]Survey[ _]of[ _]Great[ _]Britain|British[ _]National[ _]Grid/i.test(w))
+    return { datum: DATUMS.osgb36, label: DATUMS.osgb36.name, known: true };
+  // Custom datum with explicit TOWGS84 + spheroid in the WKT
+  const tw = w.match(/TOWGS84\s*\[\s*([-\d.eE+,\s]+)\]/i), sp = w.match(/SPHEROID\s*\[\s*"[^"]*"\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
+  if (tw && sp) {
+    const v = tw[1].split(',').map(Number);
+    const a = +sp[1], invf = +sp[2], b = invf ? a * (1 - 1 / invf) : a;
+    const nonzero = v.some(x => Math.abs(x) > 1e-9);
+    if (v.length >= 3 && nonzero && !/WGS[ _]?84|WGS[ _]?1984/i.test((w.match(/DATUM\s*\[\s*"([^"]*)"/i) || [])[1] || ''))
+      return { datum: { name: 'map datum', a, b, t: v.slice(0, 3), r: (v.length >= 6 ? v.slice(3, 6) : [0, 0, 0]), s: v[6] || 0 }, label: ((w.match(/DATUM\s*\[\s*"([^"]*)"/i) || [])[1] || 'custom datum').replace(/_/g, ' '), known: true };
+  }
+  if (!w && !e) return { datum: null, label: 'not stated (assuming GPS/WGS84)', known: true };
+  if ([4326, 3857, 4258, 3395, 900913].includes(e) || /WGS[ _]?84|WGS[ _]?1984|ETRS|GRS[ _]?1980|Pseudo[ _-]?Mercator/i.test(w))
+    return { datum: null, label: 'WGS84 (GPS)', known: true };
+  const dn = (w.match(/DATUM\s*\[\s*"([^"]*)"/i) || [])[1];
+  return { datum: null, label: (dn || ('EPSG ' + e)).replace(/_/g, ' '), known: false };
+}
+
+/* Find the map frame(s) in the raw PDF and build the page → lat/lng transform.
+   Picks the largest frame (the main map, not an inset or legend). */
+function geoFromPdfText(text, pageW, pageH) {
+  const nums = t => t.trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
+  const objs = {};
+  const objRe = /(\d+)\s+(\d+)\s+obj\b([\s\S]*?)endobj/g;
+  let m;
+  while ((m = objRe.exec(text))) objs[m[1]] = m[3];
+  const cands = [];
+  const nearestBBox = (str, at, lo, hi) => {
+    const re = /\/BBox\s*\[([^\]]+)\]/g; let mm, best = null, bd = 1e9;
+    while ((mm = re.exec(str))) {
+      if (mm.index < lo || mm.index > hi) continue;
+      const d = Math.abs(mm.index - at); if (d < bd && d < 2000) { bd = d; best = nums(mm[1]); }
+    }
+    return best;
+  };
+  // One measure (map frame) = the stretch of text around one /GPTS
+  const addCand = (body, objNum, at, lo, hi) => {
+    const seg = body.slice(lo, hi);
+    const g = seg.match(/\/GPTS\s*\[([^\]]+)\]/), l = seg.match(/\/LPTS\s*\[([^\]]+)\]/);
+    if (!g || !l) return;
+    const gpts = nums(g[1]), lpts = nums(l[1]);
+    if (gpts.length < 8 || lpts.length < 8) return;
+    // Coordinate system: inline dict or a reference to another object
+    let gcsText = '';
+    const gi = seg.match(/\/GCS\s*<<([\s\S]*?)>>/), gr = seg.match(/\/GCS\s+(\d+)\s+\d+\s+R/);
+    if (gi) gcsText = gi[1]; else if (gr && objs[gr[1]]) gcsText = objs[gr[1]];
+    const wkt = (gcsText.match(/\/WKT\s*\(((?:\\\)|[^)])*)\)/) || [])[1] || '';
+    const epsg = (gcsText.match(/\/EPSG\s+(\d+)/) || [])[1] || '';
+    // Frame size: the /BBox of the viewport that owns this measure
+    let bbox = nearestBBox(body, at, lo, hi);
+    if (!bbox && objNum) {
+      const refRe = new RegExp('/Measure\\s+' + objNum + '\\s+\\d+\\s+R');
+      for (const k in objs) { const r = objs[k].search(refRe); if (r >= 0) { bbox = nearestBBox(objs[k], r, 0, objs[k].length); if (bbox) break; } }
+    }
+    cands.push({ gpts, lpts, wkt, epsg, bbox });
+  };
+  const scanBody = (body, objNum) => {
+    const pos = []; const re = /\/GPTS/g; let mm;
+    while ((mm = re.exec(body))) pos.push(mm.index);
+    pos.forEach((at, j) => {
+      const lo = j ? Math.floor((pos[j - 1] + at) / 2) : 0;
+      const hi = j < pos.length - 1 ? Math.floor((at + pos[j + 1]) / 2) : body.length;
+      addCand(body, pos.length === 1 ? objNum : null, at, lo, hi);
+    });
+  };
+  for (const k in objs) if (objs[k].indexOf('/GPTS') >= 0) scanBody(objs[k], k);
+  if (!cands.length) scanBody(text, null);              // unusual layout: whole file
+  if (!cands.length) return null;
+  const area = c => c.bbox && c.bbox.length >= 4 ? Math.abs((c.bbox[2] - c.bbox[0]) * (c.bbox[3] - c.bbox[1])) : pageW * pageH * 0.5;
+  cands.sort((a, b) => area(b) - area(a));
+  const c = cands[0];
+  const bbox = c.bbox && c.bbox.length >= 4 ? c.bbox : [0, 0, pageW, pageH];
+  const bx = Math.min(bbox[0], bbox[2]), by = Math.min(bbox[1], bbox[3]), bw = Math.abs(bbox[2] - bbox[0]), bh = Math.abs(bbox[3] - bbox[1]);
+  const dat = detectDatum(c.wkt, c.epsg);
+  const pts = [];
+  for (let i = 0; i < 4; i++) {
+    let lat = c.gpts[i * 2], lng = c.gpts[i * 2 + 1];
+    if (dat.datum) [lat, lng] = toWgs84(lat, lng, dat.datum);
+    pts.push({ x: bx + c.lpts[i * 2] * bw, y: by + c.lpts[i * 2 + 1] * bh, lat, lng });
+  }
+  const aff = buildAffine(pts);
+  if (aff) aff.geoInfo = { datum: dat.label, converted: !!dat.datum, known: dat.known, frames: cands.length };
+  return aff;
 }
 
 /* Parse GPTS/LPTS from raw PDF bytes — robust across pdf.js versions. */
@@ -3963,35 +4254,7 @@ async function parseGeoFromBytes() {
   try {
     const data = APP.pdf.getData ? await APP.pdf.getData() : null;
     if (!data) return null;
-    const len = data.length;
-    let text = '';
-    const HEAD = Math.min(len, 300000);
-    const TAIL = Math.min(len, 300000);
-    for (let i = 0; i < HEAD; i++) text += String.fromCharCode(data[i]);
-    if (len > HEAD) {
-      const from = Math.max(HEAD, len - TAIL);
-      for (let i = from; i < len; i++) text += String.fromCharCode(data[i]);
-    }
-    const gptsM = text.match(/\/GPTS\s*\[([^\]]+)\]/);
-    const lptsM = text.match(/\/LPTS\s*\[([^\]]+)\]/);
-    const bboxM = text.match(/\/BBox\s*\[([^\]]+)\]/);
-    if (!gptsM || !lptsM) return null;
-    const nums = s => s.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
-    const gpts = nums(gptsM[1]);
-    const lpts = nums(lptsM[1]);
-    if (gpts.length < 8 || lpts.length < 8) return null;
-    const bbox = bboxM ? nums(bboxM[1]) : [0, 0, APP.pageW, APP.pageH];
-    const bx = bbox[0], by = bbox[1], bw = bbox[2] - bbox[0], bh = bbox[3] - bbox[1];
-    const pts = [];
-    for (let i = 0; i < 4; i++) {
-      pts.push({
-        x: bx + lpts[i*2] * bw,
-        y: by + lpts[i*2+1] * bh,
-        lat: gpts[i*2],
-        lng: gpts[i*2+1]
-      });
-    }
-    return buildAffine(pts);
+    return geoFromPdfText(pdfBytesToText(data), APP.pageW, APP.pageH);
   } catch (e) { console.error(e); return null; }
 }
 
@@ -4901,10 +5164,19 @@ function toggleToolMenu() {
   refreshToolMenuVisibility();
   updateCompSection();
   refreshAccountLabel();
+  toggleToolMore(false);
   m.classList.toggle('show');
   if (fab) fab.style.visibility = m.classList.contains('show') ? 'hidden' : '';
 }
 
+function toggleToolMore(force) {
+  const m = document.getElementById('tool-menu'); if (!m) return;
+  const open = typeof force === 'boolean' ? force : !m.classList.contains('more-open');
+  m.classList.toggle('more-open', open);
+  const b = document.getElementById('tm-more-btn'); if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
+  const l = document.getElementById('tm-more-label'); if (l) l.textContent = open ? 'Back' : 'More';
+  m.classList.toggle('paged', typeof force !== 'boolean');   // animate only when tapped
+}
 function refreshAccountLabel() {
   const lbl = document.getElementById('tm-account-label');
   if (!lbl) return;
@@ -6018,6 +6290,8 @@ function enterBorderMode() {
   };
   toast(modeToast[BORDER.mode] || 'Border Mode active', 'ok');
   haptic([40, 60, 40]);
+  // Keep the track distance bar showing if you're recording at the same time
+  if (TRACK.recording || TRACK.pts.length) updateTrackReadout();
   refreshNativeNotification();
 }
 
@@ -7817,7 +8091,8 @@ function saveRecent(file) {
       size: file.size,
       ts: Date.now(),
       done: prev ? prev.done : false,
-      centroid
+      centroid,
+      squadMap: prev && prev.squadMap ? prev.squadMap : undefined
     };
     const filtered = list.filter(r => r.name !== file.name);
     filtered.unshift(entry);
@@ -7906,7 +8181,9 @@ function renderRecents() {
 function renderRecentRow(r, isDone) {
   const safeName = escapeHtml(r.name);
   const displayName = escapeHtml(r.name.replace(/\.pdf$/i, ''));
-  const badge = isDone ? '<span class="lmr-done-badge">DONE</span>' : '';
+  const sqCur = getSquad();
+  const squadTag = r.squadMap && sqCur && r.squadMap.squadId === sqCur.id ? '<span class="rc-squad-tag">SQUAD</span>' : '';
+  const badge = (isDone ? '<span class="lmr-done-badge">DONE</span>' : '') + squadTag;
   const state = loadMapState(r.name);
   const hasState = state && (
     (state.measurePts && state.measurePts.length) ||
@@ -8088,35 +8365,7 @@ async function parseGeoFromPdf(pdf, pageW, pageH) {
   try {
     const data = pdf.getData ? await pdf.getData() : null;
     if (!data) return null;
-    const len = data.length;
-    let text = '';
-    const HEAD = Math.min(len, 300000);
-    const TAIL = Math.min(len, 300000);
-    for (let i = 0; i < HEAD; i++) text += String.fromCharCode(data[i]);
-    if (len > HEAD) {
-      const from = Math.max(HEAD, len - TAIL);
-      for (let i = from; i < len; i++) text += String.fromCharCode(data[i]);
-    }
-    const gptsM = text.match(/\/GPTS\s*\[([^\]]+)\]/);
-    const lptsM = text.match(/\/LPTS\s*\[([^\]]+)\]/);
-    const bboxM = text.match(/\/BBox\s*\[([^\]]+)\]/);
-    if (!gptsM || !lptsM) return null;
-    const nums = s => s.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
-    const gpts = nums(gptsM[1]);
-    const lpts = nums(lptsM[1]);
-    if (gpts.length < 8 || lpts.length < 8) return null;
-    const bbox = bboxM ? nums(bboxM[1]) : [0, 0, pageW, pageH];
-    const bx = bbox[0], by = bbox[1], bw = bbox[2] - bbox[0], bh = bbox[3] - bbox[1];
-    const pts = [];
-    for (let i = 0; i < 4; i++) {
-      pts.push({
-        x: bx + lpts[i*2] * bw,
-        y: by + lpts[i*2+1] * bh,
-        lat: gpts[i*2],
-        lng: gpts[i*2+1]
-      });
-    }
-    return buildAffine(pts);
+    return geoFromPdfText(pdfBytesToText(data), pageW, pageH);
   } catch (e) { return null; }
 }
 
@@ -8434,9 +8683,16 @@ async function actionDelete() {
 }
 
 async function reopenRecent(name) {
+  const rec = getRecent(name);
+  const sq = getSquad();
+  if (rec && rec.squadMap && sq && rec.squadMap.squadId === sq.id) {
+    showMapOpenSheet({ name, map: { id: rec.squadMap.id, squad_id: rec.squadMap.squadId, file_url: rec.squadMap.url, name } });
+    return;
+  }
   // Try to load from IndexedDB first — that's the resume path
   const buf = await loadPdfBlob(name);
   if (buf) {
+    APP.viewMode = null;
     APP.squadMapId = null;
     stopSquadMapOverlay();
     let recents = [];
@@ -8497,6 +8753,7 @@ function onLibFab() {
 
 // Bottom-nav: Home — show the map library (the landing page)
 function bnHome() {
+  if (typeof chatCloseAll === 'function') chatCloseAll();
   // Close settings if open
   const s = document.getElementById('settings-screen');
   if (s) s.classList.remove('show');
@@ -8514,6 +8771,7 @@ function bnHome() {
 
 // Bottom-nav: Map — open basemap
 function bnMap() {
+  if (typeof chatCloseAll === 'function') chatCloseAll();
   const s = document.getElementById('settings-screen');
   if (s) s.classList.remove('show');
   skipToBasemap();
@@ -8524,6 +8782,8 @@ function bnMap() {
    SETTINGS SCREEN
    ========================================================= */
 function openSettings() {
+  if (typeof chatCloseAll === 'function') chatCloseAll();
+  if (PF_DRAFT) closeProfileEdit();
   // Hide library if visible
   document.getElementById('library-screen').classList.add('hidden');
   const s = document.getElementById('settings-screen');
@@ -8600,6 +8860,7 @@ let _pfSyncTimer = null;
 function setProfile(p) {
   try { localStorage.setItem('fft.profile', JSON.stringify(p)); } catch (e) { warnIfStorageFull(e); }
   flashProfileSaved();
+  if (typeof chatProfileChanged === 'function') chatProfileChanged();
   // Keep your squad's copy of your profile up to date
   clearTimeout(_pfSyncTimer);
   _pfSyncTimer = setTimeout(() => {
@@ -8619,6 +8880,10 @@ function dataUrlToBlobSafe(d) {
 async function setMyAvatarFromFile(file) {
   const data = await compressPhoto(file, 256);
   if (!data) return null;
+  commitAvatarData(data);
+  return data;
+}
+function commitAvatarData(data) {
   try { localStorage.setItem('fft.avatarData', data); } catch (e) { warnIfStorageFull(e); }
   (async () => {
     try {
@@ -8629,89 +8894,157 @@ async function setMyAvatarFromFile(file) {
       const sq = getSquad(); if (sq) await squadUpsertMember(sq.id, getMemberName(), url);
     } catch (e) { console.warn('avatar upload failed', e); }
   })();
-  return data;
 }
-async function onProfileAvatarPicked(file) {
-  document.getElementById('pf-avatar-input').value = '';
-  if (!file) return;
-  const data = await setMyAvatarFromFile(file);
-  if (!data) { toast('Could not read that photo', 'err'); return; }
-  renderProfile(); flashProfileSaved();
-}
+/* ---------- Profile page (view) ---------- */
 let _pfSavedTimer = null;
-function flashProfileSaved() {
-  const el = document.getElementById('pf-saved'); if (!el) return;
-  el.classList.add('show'); clearTimeout(_pfSavedTimer);
-  _pfSavedTimer = setTimeout(() => el.classList.remove('show'), 1400);
+function flashProfileSaved() {}   // saving is explicit now (Save button)
+function setAvatarEls(imgId, fbId, src) {
+  const img = document.getElementById(imgId), fb = document.getElementById(fbId);
+  if (!img || !fb) return;
+  if (src) { img.src = src; img.style.display = 'block'; fb.style.display = 'none'; } else { img.removeAttribute('src'); img.style.display = 'none'; fb.style.display = ''; }
 }
 function renderProfileCard() {
-  const name = getMemberName(), p = getProfile(), av = myAvatarSrc();
-  const img = document.getElementById('pf-avatar-img'), fb = document.getElementById('pf-avatar-fallback');
-  if (av) { img.src = av; img.style.display = 'block'; fb.style.display = 'none'; } else { img.style.display = 'none'; fb.style.display = ''; }
+  const name = getMemberName(), p = getProfile();
+  setAvatarEls('pf-avatar-img', 'pf-avatar-fallback', myAvatarSrc());
   document.getElementById('pf-handle').textContent = name ? '@' + name : 'Set a username';
   const sq = getSquad();
-  document.getElementById('pf-meta').textContent = [p.exp ? p.exp + ' experience' : '', sq ? 'Squad: ' + sq.name : ''].filter(Boolean).join(' · ');
+  document.getElementById('pf-meta').textContent = [p.exp ? p.exp + ' experience' : '', sq ? sq.name : ''].filter(Boolean).join(' · ');
   const bv = document.getElementById('pf-bio-view'); bv.textContent = p.bio; bv.style.display = p.bio ? '' : 'none';
   document.getElementById('pf-chips-view').innerHTML = p.tickets.map(t => '<span class="pf-chip on small">' + esc(t) + '</span>').join('');
+  document.getElementById('pf-empty-hint').style.display = (!p.bio && !p.exp && !p.tickets.length) ? '' : 'none';
+}
+async function renderProfileStats() {
+  let maps = 0; try { maps = (JSON.parse(localStorage.getItem('fft.recents') || '[]')).length; } catch (e) {}
+  document.getElementById('pf-stat-maps').textContent = maps;
+  const sh = document.getElementById('pf-stat-shared'), ha = document.getElementById('pf-stat-ha');
+  if (!getSquad()) { sh.textContent = '–'; ha.textContent = '–'; return; }
+  let rows = [];
+  try { rows = await squadFetchTracks(); } catch (e) {}
+  const mine = rows.filter(r => isMineRow(r));
+  sh.textContent = mine.length;
+  ha.textContent = mine.reduce((a, r) => a + (+r.area_ha || 0), 0).toFixed(1);
 }
 function renderProfile() {
-  const p = getProfile();
-  const u = document.getElementById('pf-username');
-  if (document.activeElement !== u) u.value = getMemberName();
-  const bio = document.getElementById('pf-bio');
-  if (document.activeElement !== bio) bio.value = p.bio;
-  document.getElementById('pf-bio-count').textContent = (bio.value.length) + '/160';
-  document.getElementById('pf-exp').innerHTML = PROFILE_EXP.map(x =>
-    '<button class="pf-seg-btn' + (p.exp === x ? ' on' : '') + '" onclick="toggleProfileExp(\'' + x + '\')">' + x + '</button>').join('');
-  const all = PROFILE_TICKETS.concat(p.tickets.filter(t => !PROFILE_TICKETS.includes(t)));
-  document.getElementById('pf-tickets').innerHTML = all.map((t, i) =>
-    '<button class="pf-chip' + (p.tickets.includes(t) ? ' on' : '') + '" data-i="' + i + '">' + esc(t) + '</button>').join('');
-  document.querySelectorAll('#pf-tickets .pf-chip').forEach(btn => { btn.onclick = () => toggleProfileTicket(all[+btn.dataset.i]); });
+  if (PF_DRAFT) { renderProfileEditor(); return; }
   renderProfileCard();
+  renderProfileStats();
 }
-function toggleProfileExp(x) { const p = getProfile(); p.exp = p.exp === x ? '' : x; setProfile(p); renderProfile(); }
-function toggleProfileTicket(t) {
+
+/* ---------- Edit profile (nothing is saved until you tap Save) ---------- */
+let PF_DRAFT = null;
+function openProfileEdit() {
   const p = getProfile();
-  p.tickets = p.tickets.includes(t) ? p.tickets.filter(x => x !== t) : p.tickets.concat([t]);
-  setProfile(p); renderProfile();
+  PF_DRAFT = { name: getMemberName(), bio: p.bio || '', exp: p.exp || '', tickets: p.tickets.slice(), avatarData: null, _orig: null };
+  PF_DRAFT._orig = JSON.stringify({ name: PF_DRAFT.name, bio: PF_DRAFT.bio, exp: PF_DRAFT.exp, tickets: PF_DRAFT.tickets });
+  document.getElementById('pf-username').value = PF_DRAFT.name;
+  document.getElementById('pf-bio').value = PF_DRAFT.bio;
+  document.getElementById('pf-ticket-custom').value = '';
+  setProfileHint('3–20 letters, numbers, _ or .', '');
+  document.getElementById('pf-title').textContent = 'EDIT PROFILE';
+  document.getElementById('settings-screen').classList.add('pf-editing');
+  document.getElementById('pf-body').scrollTop = 0;
+  renderProfileEditor();
+}
+function renderProfileEditor() {
+  if (!PF_DRAFT) return;
+  setAvatarEls('pf-edit-avatar-img', 'pf-edit-avatar-fallback', PF_DRAFT.avatarData || myAvatarSrc());
+  document.getElementById('pf-bio-count').textContent = document.getElementById('pf-bio').value.length + '/160';
+  document.getElementById('pf-exp').innerHTML = PROFILE_EXP.map(x =>
+    '<button class="pf-seg-btn' + (PF_DRAFT.exp === x ? ' on' : '') + '" onclick="toggleProfileExp(\'' + x + '\')">' + x + '</button>').join('');
+  const all = PROFILE_TICKETS.concat(PF_DRAFT.tickets.filter(t => !PROFILE_TICKETS.includes(t)));
+  document.getElementById('pf-tickets').innerHTML = all.map((t, i) =>
+    '<button class="pf-chip' + (PF_DRAFT.tickets.includes(t) ? ' on' : '') + '" data-i="' + i + '">' + esc(t) + '</button>').join('');
+  document.querySelectorAll('#pf-tickets .pf-chip').forEach(btn => { btn.onclick = () => toggleProfileTicket(all[+btn.dataset.i]); });
+}
+function toggleProfileExp(x) { if (!PF_DRAFT) return; PF_DRAFT.exp = PF_DRAFT.exp === x ? '' : x; renderProfileEditor(); }
+function toggleProfileTicket(t) {
+  if (!PF_DRAFT) return;
+  PF_DRAFT.tickets = PF_DRAFT.tickets.includes(t) ? PF_DRAFT.tickets.filter(x => x !== t) : PF_DRAFT.tickets.concat([t]);
+  renderProfileEditor();
 }
 function addCustomTicket() {
+  if (!PF_DRAFT) return;
   const inp = document.getElementById('pf-ticket-custom');
   const t = (inp.value || '').trim();
   if (!t) return;
-  const p = getProfile();
-  if (!p.tickets.includes(t)) { p.tickets.push(t); setProfile(p); }
-  inp.value = ''; renderProfile();
+  if (!PF_DRAFT.tickets.includes(t)) PF_DRAFT.tickets.push(t);
+  inp.value = ''; renderProfileEditor();
 }
+async function onProfileAvatarPicked(file) {
+  document.getElementById('pf-avatar-input').value = '';
+  if (!file || !PF_DRAFT) return;
+  const data = await compressPhoto(file, 256);
+  if (!data) { toast('Could not read that photo', 'err'); return; }
+  PF_DRAFT.avatarData = data;
+  renderProfileEditor();
+}
+function setProfileHint(text, kind) {
+  const h = document.getElementById('pf-username-hint');
+  h.textContent = text; h.classList.toggle('err', kind === 'err'); h.classList.toggle('ok', kind === 'ok');
+}
+/* While typing: show whether the username is free (doesn't save anything) */
 let _pfInputTimer = null;
 function onProfileInput() {
-  const bio = document.getElementById('pf-bio');
-  document.getElementById('pf-bio-count').textContent = bio.value.length + '/160';
+  document.getElementById('pf-bio-count').textContent = document.getElementById('pf-bio').value.length + '/160';
   clearTimeout(_pfInputTimer);
-  _pfInputTimer = setTimeout(saveProfileText, 700);
+  _pfInputTimer = setTimeout(checkProfileUsername, 700);
 }
-async function saveProfileText() {
-  const p = getProfile();
-  const bio = document.getElementById('pf-bio').value.trim().slice(0, 160);
-  if (bio !== p.bio) { p.bio = bio; setProfile(p); }
+async function checkProfileUsername() {
+  if (!PF_DRAFT) return;
   const name = cleanUsername(document.getElementById('pf-username').value);
-  const hint = document.getElementById('pf-username-hint');
   const err = usernameError(name);
-  const setHint = (t, bad) => { hint.textContent = t; hint.classList.toggle('err', !!bad); };
-  if (err) { setHint(err, true); renderProfileCard(); return; }
-  if (name === getMemberName()) { setHint('3–20 letters, numbers, _ or .', false); renderProfileCard(); return; }
-  setHint('Checking @' + name + '…', false);
-  const r = await claimUsername(name);
-  if (cleanUsername(document.getElementById('pf-username').value) !== name) return;   // they kept typing
-  if (r === 'taken') { setHint('@' + name + ' is taken — try another', true); return; }
-  if (r === 'invalid') { setHint('Use 3–20 letters, numbers, _ or .', true); return; }
-  if (r === 'offline') { setHint('No signal — can\'t check usernames right now. Still @' + getMemberName() + '.', true); return; }
-  markUsernameClaimed(name);
-  setMemberName(name); flashProfileSaved();
-  setHint('@' + name + ' is yours ✓', false);
-  const sq = getSquad();
-  if (sq && typeof sbReady === 'function' && sbReady()) squadUpsertMember(sq.id, name, getMyAvatarUrl());
-  renderProfileCard();
+  if (err) { setProfileHint(err, 'err'); return; }
+  if (name === getMemberName()) { setProfileHint('3–20 letters, numbers, _ or .', ''); return; }
+  setProfileHint('Checking @' + name + '…', '');
+  try {
+    const { data } = await sb.from('usernames').select('device_id').ilike('username', name);
+    if (cleanUsername(document.getElementById('pf-username').value) !== name) return;
+    const takenByOther = (data || []).some(r => r.device_id !== getDeviceId());
+    setProfileHint(takenByOther ? '@' + name + ' is taken — try another' : '@' + name + ' is free', takenByOther ? 'err' : 'ok');
+  } catch (e) { setProfileHint('3–20 letters, numbers, _ or .', ''); }
+}
+function profileDraftDirty() {
+  if (!PF_DRAFT) return false;
+  const now = JSON.stringify({ name: cleanUsername(document.getElementById('pf-username').value), bio: document.getElementById('pf-bio').value.trim(), exp: PF_DRAFT.exp, tickets: PF_DRAFT.tickets });
+  return !!PF_DRAFT.avatarData || now !== PF_DRAFT._orig;
+}
+function closeProfileEdit() {
+  PF_DRAFT = null;
+  document.getElementById('settings-screen').classList.remove('pf-editing');
+  document.getElementById('pf-title').textContent = 'PROFILE';
+  renderProfile();
+}
+function cancelProfileEdit() {
+  if (profileDraftDirty()) showConfirm('Discard changes?', 'Your edits to your profile won\'t be saved.', '', 'DISCARD', closeProfileEdit);
+  else closeProfileEdit();
+}
+let _pfSaving = false;
+async function saveProfileEdit() {
+  if (!PF_DRAFT || _pfSaving) return;
+  clearTimeout(_pfInputTimer);   // a pending "is it free?" check mustn't overwrite the save result
+  const name = cleanUsername(document.getElementById('pf-username').value);
+  const err = usernameError(name);
+  if (err) { setProfileHint(err, 'err'); document.getElementById('pf-username').focus(); return; }
+  _pfSaving = true;
+  const btns = [document.getElementById('pf-save'), document.querySelector('.pf-save-big')];
+  btns.forEach(b => { if (b) { b.disabled = true; b.dataset.l = b.textContent; b.textContent = 'Saving…'; } });
+  try {
+    if (name !== getMemberName()) {
+      const r = await claimUsername(name);
+      if (r === 'taken') { setProfileHint('@' + name + ' is taken — try another', 'err'); return; }
+      if (r === 'invalid') { setProfileHint('Use 3–20 letters, numbers, _ or .', 'err'); return; }
+      if (r === 'offline') { setProfileHint('No signal — can\'t check a new username right now. Change it back or try again with signal.', 'err'); return; }
+      markUsernameClaimed(name);
+      setMemberName(name);
+    }
+    setProfile({ bio: document.getElementById('pf-bio').value.trim().slice(0, 160), exp: PF_DRAFT.exp, tickets: PF_DRAFT.tickets.slice(0, 40) });
+    if (PF_DRAFT.avatarData) commitAvatarData(PF_DRAFT.avatarData);
+    closeProfileEdit();
+    toast('Profile saved', 'ok');
+  } finally {
+    _pfSaving = false;
+    btns.forEach(b => { if (b) { b.disabled = false; if (b.dataset.l) b.textContent = b.dataset.l; } });
+  }
 }
 
 function closeSettings() {
@@ -8835,6 +9168,7 @@ function setActiveNav(which) {
   document.getElementById('bn-home').classList.toggle('active', which === 'home');
   document.getElementById('bn-map').classList.toggle('active', which === 'map');
   document.getElementById('bn-settings').classList.toggle('active', which === 'settings');
+  const c = document.getElementById('bn-chat'); if (c) c.classList.toggle('active', which === 'chat');
 }
 
 /* =========================================================
@@ -8848,7 +9182,7 @@ function goHome() {
   if (APP.gps.active) stopGps();
   APP.pdf = null; APP.page = null; APP.fwd = null; APP.inv = null;
   APP.fileName = '';
-  APP.squadMapId = null;
+  APP.squadMapId = null; APP.viewMode = null;
   stopSquadMapOverlay();
   // Clear photo pins
   PHOTO_PINS.items.forEach(p => { if (p._marker) { try { APP.leaf.removeLayer(p._marker); } catch(_){} } });
@@ -8940,12 +9274,14 @@ function getMemberName() {
 }
 function setMemberName(n) {
   try { localStorage.setItem('fft.memberName', n); } catch (e) {}
+  if (typeof chatProfileChanged === 'function') chatProfileChanged();
 }
 function getMyAvatarUrl() {
   try { return localStorage.getItem('fft.myAvatarUrl') || ''; } catch (e) { return ''; }
 }
 function setMyAvatarUrl(u) {
   try { if (u) localStorage.setItem('fft.myAvatarUrl', u); } catch (e) {}
+  if (typeof chatProfileChanged === 'function') chatProfileChanged();
 }
 function isSquadOwner() {
   const sq = getSquad();
@@ -9044,6 +9380,7 @@ async function squadCreate(squadName, memberName) {
     renderSquadPanel();
     refreshSquadOverlays();
     toast('Squad created — code ' + data.code, 'ok');
+    if (typeof chatSquadChanged === 'function') chatSquadChanged();
   } catch (e) {
     console.warn(e);
     toast('Network error — check your connection and try again', 'err');
@@ -9060,12 +9397,15 @@ async function squadJoin(code, memberName) {
     renderSquadPanel();
     refreshSquadOverlays();
     toast('Joined ' + data.name, 'ok');
+    if (typeof chatSquadChanged === 'function') chatSquadChanged();
   } catch (e) {
     console.warn(e);
     toast('Network error — check your connection and try again', 'err');
   }
 }
 function squadLeaveNow() {
+  const _oldSq = getSquad();
+  if (_oldSq && typeof chatOnSquadLeave === 'function') chatOnSquadLeave(_oldSq);
   setSquad(null);
   const t = document.getElementById('sq-overlay-toggle');
   if (t) t.checked = false;
@@ -9144,7 +9484,12 @@ async function onSquadMapPicked(file) {
   const sq = getSquad();
   if (!sq) return;
   toast('Uploading map…', 'info');
-  const path = 'maps/' + sq.id + '/' + Date.now() + '-' + file.name;
+  // Phones often save downloads as "Bank%20&%20Afton.pdf". Use the readable name for
+  // display, and a plain safe filename for storage so the download link always works.
+  let niceName = file.name;
+  try { niceName = decodeURIComponent(file.name); } catch (e) {}
+  const safeKey = niceName.replace(/\.pdf$/i, '').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 80) || 'map';
+  const path = 'maps/' + sq.id + '/' + Date.now() + '-' + safeKey + '.pdf';
   const buf = await file.arrayBuffer();
   const url = await uploadToSquadMedia(path, file);
   if (!url) { toast('Upload failed', 'err'); return; }
@@ -9155,7 +9500,7 @@ async function onSquadMapPicked(file) {
     thumbUrl = await uploadToSquadMedia(thumbPath, dataUrlToBlob(thumbDataUrl));
   }
   try {
-    const { error } = await sb.from('squad_maps').insert({ squad_id: sq.id, name: file.name, file_url: url, thumb_url: thumbUrl, uploaded_by: getDeviceId() });
+    const { error } = await sb.from('squad_maps').insert({ squad_id: sq.id, name: niceName, file_url: url, thumb_url: thumbUrl, uploaded_by: getDeviceId() });
     if (error) { toast('Could not save map', 'err'); console.warn(error); return; }
     renderSquadPanel();
     toast('Map added to squad', 'ok');
@@ -9164,24 +9509,109 @@ async function onSquadMapPicked(file) {
     toast('Network error — check your connection and try again', 'err');
   }
 }
+/* =========================================================
+   OPEN A SQUAD MAP — choose how:
+   - "squad": everyone's tracks, pins and live positions
+   - "mine":  just your own work; squad hidden, your live position not sent
+   Uses the copy already saved on the phone when there is one, so both
+   work with no signal. Shares from either mode go to the same squad map.
+   ========================================================= */
+let _mapOpenCtx = null;
+function getRecent(name) {
+  try { return (JSON.parse(localStorage.getItem('fft.recents') || '[]')).find(x => x.name === name) || null; } catch (e) { return null; }
+}
+function tagRecentAsSquadMap(name, map) {
+  try {
+    const list = JSON.parse(localStorage.getItem('fft.recents') || '[]');
+    const r = list.find(x => x.name === name);
+    if (r) { r.squadMap = { id: map.id, squadId: map.squad_id, url: map.file_url }; localStorage.setItem('fft.recents', JSON.stringify(list)); renderRecents(); }
+  } catch (e) {}
+}
+function showMapOpenSheet(ctx) {
+  _mapOpenCtx = ctx;
+  const sq = getSquad();
+  document.getElementById('mo-title').textContent = (ctx.name || 'Map').replace(/\.pdf$/i, '');
+  document.getElementById('mo-sub').textContent = sq ? 'Shared in ' + sq.name : '';
+  document.getElementById('mo-backdrop').classList.add('show');
+  document.getElementById('mo-sheet').classList.add('show');
+}
+function closeMapOpenSheet() {
+  document.getElementById('mo-backdrop').classList.remove('show');
+  document.getElementById('mo-sheet').classList.remove('show');
+}
 async function openSquadMap(mapId) {
   const maps = APP._squadMapsCache || [];
   const map = maps.find(m => m.id === mapId);
   if (!map) return;
+  showMapOpenSheet({ map, name: map.name });
+}
+async function chooseMapOpen(mode) {
+  const ctx = _mapOpenCtx; _mapOpenCtx = null;
+  closeMapOpenSheet();
+  if (!ctx) return;
+  const map = ctx.map;
+  const name = ctx.name;
   closeSquad();
-  toast('Downloading map…', 'info');
-  try {
-    const resp = await fetch(map.file_url);
-    if (!resp.ok) throw new Error('fetch failed: ' + resp.status);
-    const buf = await resp.arrayBuffer();
-    await storePdfBlob(map.name, buf);
-    await loadPdfFromBuffer(buf, map.name, buf.byteLength, false);
-    APP.squadMapId = map.id;
-    startSquadMapOverlay(map.id);
-  } catch (e) {
-    console.warn(e);
-    toast('Could not open map — check your connection', 'err');
+  // Saved copy first (offline), unless it's a different map that happens to share the name
+  const rec = getRecent(name);
+  let buf = await loadPdfBlob(name);
+  if (buf && rec && rec.squadMap && rec.squadMap.id !== map.id) buf = null;
+  if (!buf) {
+    if (!map.file_url) { toast('This map isn\'t on the phone yet — open it from the Squad list with signal', 'err'); return; }
+    if (!navigator.onLine) { toast('No signal — this map hasn\'t been downloaded to the phone yet', 'err'); return; }
+    toast('Downloading map…', 'info');
+    try {
+      let resp = await fetch(map.file_url);
+      // Older uploads could have a double-encoded link (%2520) — try the corrected one
+      if (!resp.ok && /%25[0-9A-Fa-f]{2}/.test(map.file_url)) resp = await fetch(map.file_url.replace(/%25([0-9A-Fa-f]{2})/g, '%$1'));
+      if (!resp.ok) {
+        toast(resp.status === 404 || resp.status === 400 ? 'This map\'s file is missing — ask whoever added it to add it again' : 'Map download failed (' + resp.status + ')', 'err');
+        return;
+      }
+      buf = await resp.arrayBuffer();
+      await storePdfBlob(name, buf);
+    } catch (e) {
+      console.warn(e);
+      toast('Could not download the map — check your connection', 'err');
+      return;
+    }
   }
+  if (TOOL.active) cancelTool();
+  stopSquadMapOverlay();
+  APP.squadMapId = map.id;
+  APP.viewMode = mode;
+  const hasState = !!loadMapState(name);
+  await loadPdfFromBuffer(buf, name, buf.byteLength, hasState);
+  if (!APP.fwd) return;
+  tagRecentAsSquadMap(name, map);
+  if (mode === 'mine') setTimeout(() => toast('Your map · squad hidden', 'info'), 1200);
+  else {
+    if (!squadShowPref()) setSquadShowPref(true);
+    setTimeout(() => toast('Squad map · showing ' + (getSquad() ? getSquad().name : 'your squad') + '\'s work', 'ok'), 1200);
+  }
+}
+/* Is the squad being shown right now? (global setting + this map's mode) */
+function squadVisibleNow() { return !!getSquad() && squadShowPref() && APP.viewMode !== 'mine'; }
+/* Tools-menu button: on a squad map it switches mode; elsewhere it's the global setting */
+function toggleSquadView() {
+  if (APP.squadMapId && APP.viewMode) {
+    if (APP.viewMode === 'mine') {
+      APP.viewMode = 'squad';
+      if (!squadShowPref()) { setSquadShowPref(true); }
+      else { startSquadMapOverlay(APP.squadMapId); refreshSquadOverlays(); }
+      squadSetPresence(!!TRACK.recording);
+      toast('Squad map · showing everyone\'s work', 'ok');
+    } else {
+      APP.viewMode = 'mine';
+      squadSetPresence(false);
+      stopSquadMapOverlay(); drawToolsOnPdf();
+      if (squadLayerGroup) squadLayerGroup.clearLayers();
+      toast('Your map · squad hidden', 'info');
+    }
+    updateSquadMenuLabel();
+    return;
+  }
+  setSquadShowPref(!squadShowPref());
 }
 
 /* =========================================================
@@ -9209,7 +9639,7 @@ async function squadLoadMapOverlay(mapId) {
   if (!getSquad()) return;
   mapId = mapId || null;
   const [tracks, presence, members] = await Promise.all([
-    mapId ? squadFetchTracksForMap(mapId) : squadFetchTracks(),
+    squadFetchTracks(),
     mapId ? squadFetchPresenceForMap(mapId) : squadFetchPresence(),
     squadFetchMembers()
   ]);
@@ -9351,7 +9781,7 @@ let _squadHighlightUntil = 0;
 
 function drawSquadOnPdf(ctx) {
   const ov = APP._squadMapOverlay;
-  if (!ov || ov.mapId !== (APP.squadMapId || null) || !squadShowPref()) return;
+  if (!ov || ov.mapId !== (APP.squadMapId || null) || !squadVisibleNow()) return;
   const scale = Math.max(APP.view.scale || 1, 0.001);
   const K = Math.max(0.3, Math.min(20, 1 / scale));
   const toXY = (lat, lng) => {
@@ -9536,11 +9966,11 @@ function setSquadShowPref(on) {
 }
 function updateSquadMenuLabel() {
   const el = document.getElementById('tm-squad-show-label');
-  if (el) el.textContent = squadShowPref() ? 'Squad on map: on' : 'Squad on map: off';
+  if (el) el.textContent = squadVisibleNow() ? 'Hide squad' : 'Show squad';
   const row = document.getElementById('tm-squad-show'); if (row) row.style.display = getSquad() ? '' : 'none';
 }
 function refreshSquadOverlays() {
-  if (!getSquad() || !squadShowPref()) return;
+  if (!squadVisibleNow()) return;
   if (APP.mode === 'pdf') { if (APP.fwd) squadLoadMapOverlay(APP.squadMapId || null); }
   else if (APP.leaf) { if (!squadLayerGroup || !squadOverlayTimer) squadOverlayToggle(true); else squadRedrawOverlay(); }
 }
@@ -9597,9 +10027,10 @@ async function openMemberProfile(r, context) {
   const pinsN = theirs.reduce((a, x) => a + ((x.pts && x.pts.pins) ? x.pts.pins.length : 0), 0);
   document.getElementById('mp-stats').textContent = theirs.length
     ? 'Shared on ' + theirs.length + ' map' + (theirs.length > 1 ? 's' : '') + ' · ' + ha.toFixed(2) + ' ha · ' + km.toFixed(2) + ' km tracked' + (pinsN ? ' · ' + pinsN + ' pin' + (pinsN > 1 ? 's' : '') : '')
-    : (isMe ? 'Use “Share map to squad” to show your work here.' : 'Hasn\'t shared anything yet.');
+    : (isMe ? 'Use “Share to squad” to show your work here.' : 'Hasn\'t shared anything yet.');
   document.getElementById('mp-backdrop').classList.add('show');
   document.getElementById('mp-sheet').classList.add('show');
+  if (typeof chatRenderProfileActions === 'function') chatRenderProfileActions(null, m ? m.device_id : (isMe ? getDeviceId() : null));
 }
 function closeMemberProfile() {
   document.getElementById('mp-backdrop').classList.remove('show');
@@ -9749,7 +10180,8 @@ async function squadSendPresence(recording) {
       {
         squad_id: sq.id, map_id: APP.squadMapId, device_id: getDeviceId(),
         member_name: getMemberName() || 'Contractor', recording,
-        lat: hasPos ? APP.gps.lat : null, lng: hasPos ? APP.gps.lng : null,
+        // Only send a position while actively tracking on the squad map
+        lat: (recording && hasPos) ? APP.gps.lat : null, lng: (recording && hasPos) ? APP.gps.lng : null,
         updated_at: new Date().toISOString()
       },
       { onConflict: 'map_id,device_id' }
@@ -9757,6 +10189,7 @@ async function squadSendPresence(recording) {
   } catch (e) { console.warn(e); }
 }
 function squadSetPresence(recording) {
+  if (APP.viewMode === 'mine') recording = false;
   squadSendPresence(recording);
   if (squadPresenceHeartbeat) { clearInterval(squadPresenceHeartbeat); squadPresenceHeartbeat = null; }
   if (recording) {
@@ -9872,7 +10305,7 @@ function squadAvatarIcon(name, avatarUrl, opts) {
 async function squadRedrawOverlay() {
   if (!APP.leaf || !squadLayerGroup) return;
   const sq = getSquad();
-  if (!sq || !squadShowPref()) { squadLayerGroup.clearLayers(); return; }
+  if (!sq || !squadVisibleNow()) { squadLayerGroup.clearLayers(); return; }
   if (APP.mode === 'pdf') return;          // the GeoPDF view has its own overlay
   let [rows, presence, members] = await Promise.all([squadFetchTracks(), squadFetchPresence(), squadFetchMembers()]);
   cacheSquadMembers(members);
@@ -10185,11 +10618,1019 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
+/* =========================================================
+   CHAT + FRIENDS
+   - Silent sign-in (Supabase anonymous auth): no email or password.
+     The account is tied to this phone and linked to your username
+     and squad membership through your device id.
+   - Who you can message: friends, and anyone in the same squad.
+   - Every squad gets a group chat; you can also make your own groups.
+   - Messages: text, pins (a location you can open on the map), photos.
+   - No signal? Messages wait in an outbox and send when you're back.
+   ========================================================= */
+const CHAT = {
+  uid: null, state: 'idle', err: '', authP: null,
+  convs: [], people: {}, msgs: {}, more: {}, openId: null,
+  chan: null, friendships: [], contacts: [], blocked: new Set(),
+  newMode: 'dm', newPicked: new Set(), addTo: null,
+  convTimer: null, frTimer: null, readTimer: null, flushing: false
+};
+const CHAT_MAX_CACHE = 80;
+
+function chatLS(k, v) {
+  try {
+    if (v === undefined) return JSON.parse(localStorage.getItem('fft.chat.' + k) || 'null');
+    if (v === null) localStorage.removeItem('fft.chat.' + k);
+    else localStorage.setItem('fft.chat.' + k, JSON.stringify(v));
+  } catch (e) { if (v !== undefined) warnIfStorageFull && warnIfStorageFull(e); }
+  return null;
+}
+function chatUuid() {
+  try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+}
+
+/* ---------- sign-in ---------- */
+function chatEnsureAuth() {
+  if (CHAT.uid) return Promise.resolve(true);
+  if (CHAT.authP) return CHAT.authP;
+  CHAT.authP = (async () => {
+    try {
+      if (!navigator.onLine) { chatSetState('offline'); return false; }
+      if (typeof supabase === 'undefined' || !sbReady()) { chatSetState('offline'); return false; }
+      if (!getMemberName()) { chatSetState('noname'); return false; }
+      let { data } = await sb.auth.getSession();
+      let session = data && data.session;
+      if (!session) {
+        const r = await sb.auth.signInAnonymously();
+        if (r.error) {
+          console.warn('chat sign-in', r.error);
+          chatSetState(/anonymous/i.test(r.error.message || '') ? 'disabled' : 'offline', r.error.message);
+          return false;
+        }
+        session = r.data && r.data.session;
+      }
+      if (!session || !session.user) { chatSetState('offline'); return false; }
+      CHAT.uid = session.user.id;
+      chatSetState('ready');
+      await chatSyncProfile();
+      await chatJoinSquadChat();
+      chatSubscribe();
+      chatLoadConvs();
+      chatLoadFriends();
+      chatFlush();
+      if (typeof chatPushInit === 'function') chatPushInit();
+      return true;
+    } catch (e) {
+      console.warn('chat auth', e);
+      chatSetState('offline');
+      return false;
+    } finally { CHAT.authP = null; }
+  })();
+  return CHAT.authP;
+}
+function chatSetState(s, err) {
+  CHAT.state = s; CHAT.err = err || '';
+  const msg = {
+    offline: 'No signal right now — showing what\'s saved on your phone. Messages you write will send when you\'re back online.',
+    disabled: 'Chat isn\'t switched on yet on the server (Supabase → Authentication → Sign In / Providers → allow anonymous sign-ins).',
+    noname: 'Pick a username in Profile first — that\'s how friends find you.'
+  }[s] || '';
+  ['ch-status', 'cc-status', 'fr-status'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = msg; });
+}
+async function chatSyncProfile() {
+  if (!CHAT.uid) return;
+  const pf = getProfile();
+  const row = {
+    id: CHAT.uid, device_id: getDeviceId(), username: getMemberName() || null, avatar_url: getMyAvatarUrl() || null,
+    bio: (pf.bio || '').slice(0, 300) || null, exp: (pf.exp || '').slice(0, 20) || null,
+    tickets: (pf.tickets || []).slice(0, 40), updated_at: new Date().toISOString()
+  };
+  try {
+    let { error } = await sb.from('profiles').upsert(row, { onConflict: 'id' });
+    if (error && error.code === '23505') {            // this phone's id is already on an older account
+      delete row.device_id;
+      ({ error } = await sb.from('profiles').upsert(row, { onConflict: 'id' }));
+    }
+    if (error) console.warn('profile sync', error);
+  } catch (e) { console.warn(e); }
+}
+let _chatPfTimer = null;
+function chatProfileChanged() {
+  clearTimeout(_chatPfTimer);
+  _chatPfTimer = setTimeout(() => { if (CHAT.uid) chatSyncProfile(); }, 1800);
+}
+async function chatJoinSquadChat() {
+  const sq = getSquad();
+  if (!sq || !CHAT.uid) return;
+  try {
+    const { error } = await sb.rpc('fft_join_squad_chat', { p_squad: sq.id });
+    if (error && !/not_in_squad/.test(error.message || '')) console.warn('squad chat', error);
+  } catch (e) { console.warn(e); }
+}
+async function chatSquadChanged() {
+  if (!(await chatEnsureAuth())) return;
+  await chatSyncProfile();
+  await chatJoinSquadChat();
+  chatLoadConvs();
+}
+async function chatOnSquadLeave(sq) {
+  if (!sq) return;
+  if (!(await chatEnsureAuth())) return;
+  try {
+    const c = CHAT.convs.find(x => x.squad_id === sq.id);
+    if (c) await sb.from('conversation_members').delete().eq('conversation_id', c.id).eq('user_id', CHAT.uid);
+    await sb.from('squad_members').delete().eq('squad_id', sq.id).eq('device_id', getDeviceId());
+  } catch (e) { console.warn(e); }
+  chatLoadConvs();
+}
+
+/* ---------- realtime ---------- */
+function chatSubscribe() {
+  if (CHAT.chan || !CHAT.uid || !sb.channel) return;
+  try {
+    CHAT.chan = sb.channel('fft-chat-' + CHAT.uid)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => chatOnMessage(p.new))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, p => chatOnDeleted(p.old))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, () => chatLoadFriendsSoon())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_members', filter: 'user_id=eq.' + CHAT.uid }, () => chatLoadConvsSoon())
+      .subscribe(status => {
+        if (status === 'SUBSCRIBED') { chatLoadConvsSoon(); if (CHAT.openId) chatLoadLatest(CHAT.openId); }
+      });
+  } catch (e) { console.warn('realtime', e); CHAT.chan = null; }
+}
+function chatOnMessage(m) {
+  if (!m || !m.conversation_id) return;
+  const known = CHAT.convs.find(c => c.id === m.conversation_id);
+  chatMergeMsgs(m.conversation_id, [m]);
+  if (known) {
+    known.last_message_at = m.created_at;
+    known.last_message_preview = chatPreview(m);
+    if (m.sender !== CHAT.uid && CHAT.openId !== m.conversation_id) known.unread = (known.unread || 0) + 1;
+    CHAT.convs.sort((a, b) => String(b.last_message_at || '').localeCompare(String(a.last_message_at || '')));
+    chatSaveConvs();
+  } else chatLoadConvsSoon();
+  if (CHAT.openId === m.conversation_id) { renderConv(true); chatMarkReadSoon(); }
+  else if (m.sender !== CHAT.uid) {
+    const who = chatPersonName(m.sender);
+    if (!document.hidden) toast((who ? '@' + who + ': ' : '') + chatPreview(m).slice(0, 60), 'info');
+  }
+  renderChatList(); chatUpdateBadges();
+}
+function chatOnDeleted(old) {
+  if (!old || !old.id) return;
+  Object.keys(CHAT.msgs).forEach(cid => {
+    const arr = CHAT.msgs[cid]; const i = arr.findIndex(x => x.id === old.id);
+    if (i !== -1) { arr.splice(i, 1); chatSaveMsgs(cid); if (CHAT.openId === cid) renderConv(); }
+  });
+}
+
+/* ---------- conversations ---------- */
+function chatLoadConvsSoon() { clearTimeout(CHAT.convTimer); CHAT.convTimer = setTimeout(chatLoadConvs, 400); }
+async function chatLoadConvs() {
+  if (!CHAT.uid) return;
+  try {
+    const { data, error } = await sb.rpc('fft_my_conversations');
+    if (error) { console.warn(error); return; }
+    CHAT.convs = (data || []).map(c => {
+      if (c.id === CHAT.openId) c.unread = 0;
+      return c;
+    });
+    chatSaveConvs();
+    const ids = [];
+    CHAT.convs.forEach(c => { if (c.other_id) { CHAT.people[c.other_id] = Object.assign({}, CHAT.people[c.other_id], { id: c.other_id, username: c.other_username, avatar_url: c.other_avatar }); } });
+    renderChatList(); chatUpdateBadges();
+    if (CHAT.openId) renderConvHeader();
+  } catch (e) { console.warn(e); }
+}
+function chatSaveConvs() { chatLS('convs', CHAT.convs.slice(0, 60)); }
+function chatConv(id) { return CHAT.convs.find(c => c.id === id) || null; }
+function chatConvName(c) {
+  if (!c) return '';
+  if (c.kind === 'dm') return '@' + (c.other_username || 'someone');
+  return c.name || (c.kind === 'squad' ? 'Squad' : 'Group');
+}
+function chatAvatarHtml(name, url, cls) {
+  const col = squadColor(name || '?');
+  const st = 'border-color:' + col + ';color:' + col + ';background:' + squadColorAlpha(name || '?', 0.12);
+  return '<div class="ch-av ' + (cls || '') + '" style="' + st + '">' +
+    (url ? '<img src="' + esc(url) + '" alt="" onerror="this.remove()"/>' : esc((name || '?').replace(/^@/, '').charAt(0).toUpperCase())) + '</div>';
+}
+function chatConvAvatar(c, cls) {
+  if (c.kind === 'dm') return chatAvatarHtml(c.other_username, c.other_avatar, cls);
+  if (c.kind === 'squad') { const sq = getSquad(); return chatAvatarHtml(c.name, sq && sq.id === c.squad_id ? sq.avatarUrl : null, (cls || '') + ' sq'); }
+  return chatAvatarHtml(c.name, null, (cls || '') + ' sq');
+}
+function chatTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts), now = new Date();
+  if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const y = new Date(now); y.setDate(now.getDate() - 1);
+  if (d.toDateString() === y.toDateString()) return 'Yesterday';
+  if (now - d < 6 * 864e5) return d.toLocaleDateString('en-GB', { weekday: 'short' });
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+function chatPreview(m) {
+  if (m.kind === 'pin') return '📍 ' + (m.label || 'Location');
+  if (m.kind === 'photo') return '📷 Photo';
+  return m.body || '';
+}
+
+function openChat() {
+  if (typeof PF_DRAFT !== 'undefined' && PF_DRAFT) closeProfileEdit();
+  const s = document.getElementById('settings-screen'); if (s) s.classList.remove('show');
+  document.getElementById('chat-screen').classList.add('show');
+  setActiveNav('chat');
+  if (!CHAT.convs.length) CHAT.convs = chatLS('convs') || [];
+  renderChatList();
+  chatEnsureAuth().then(ok => { if (ok) { chatSetState('ready'); chatLoadConvs(); chatLoadFriends(); } });
+}
+function chatCloseAll() {
+  ['chat-screen', 'chat-conv', 'friends-screen', 'chat-new'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('show'); });
+  CHAT.openId = null;
+  closeChatSheet();
+}
+function chatTopLayer() {
+  const order = ['chat-new', 'friends-screen', 'chat-conv', 'chat-screen'];
+  for (const id of order) { const el = document.getElementById(id); if (el && el.classList.contains('show')) return id; }
+  return null;
+}
+function renderChatList() {
+  const el = document.getElementById('ch-list'); if (!el) return;
+  if (!CHAT.convs.length) {
+    el.innerHTML = '<div class="ch-empty"><b>No chats yet</b>Add friends by their username, or join a squad — every squad gets its own group chat.' +
+      '<div class="ch-btns" style="justify-content:center;margin-top:16px"><button class="ch-btn lime" onclick="openFriends()">Add friends</button>' +
+      '<button class="ch-btn" onclick="openNewChat(\'group\')">New group</button></div></div>';
+    return;
+  }
+  el.innerHTML = CHAT.convs.map(c => {
+    const un = c.unread > 0;
+    const tag = c.kind === 'squad' ? '<span class="ch-tag">SQUAD</span>' : c.kind === 'group' ? '<span class="ch-tag">GROUP</span>' : '';
+    return '<div class="ch-row' + (un ? ' unread' : '') + '" onclick="openConv(\'' + c.id + '\')">' + chatConvAvatar(c) +
+      '<div class="ch-mid"><div class="ch-name">' + esc(chatConvName(c)) + tag + '</div>' +
+      '<div class="ch-prev">' + esc(c.last_message_preview || (c.kind === 'dm' ? 'Say hello 👋' : c.member_count + ' member' + (c.member_count === 1 ? '' : 's'))) + '</div></div>' +
+      '<div class="ch-right"><div class="ch-time">' + chatTime(c.last_message_at) + '</div>' + (un ? '<div class="ch-count">' + (c.unread > 99 ? '99+' : c.unread) + '</div>' : '') + '</div></div>';
+  }).join('');
+}
+function chatUpdateBadges() {
+  const unread = CHAT.convs.reduce((a, c) => a + (c.unread > 0 ? c.unread : 0), 0);
+  const reqs = chatIncoming().length;
+  const n = unread + reqs;
+  document.querySelectorAll('.bn-badge').forEach(b => { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('show', n > 0); });
+  const d = document.getElementById('ch-fr-dot');
+  if (d) { d.textContent = reqs; d.style.display = reqs ? 'flex' : 'none'; }
+}
+
+/* ---------- people ---------- */
+async function chatPeople(ids) {
+  const need = [...new Set(ids)].filter(id => id && !(CHAT.people[id] && CHAT.people[id]._full));
+  if (!need.length || !CHAT.uid) return;
+  try {
+    const { data } = await sb.from('profiles').select('id,username,avatar_url,device_id,bio,exp,tickets').in('id', need);
+    (data || []).forEach(p => { p._full = true; CHAT.people[p.id] = p; });
+    chatLS('people', Object.fromEntries(Object.entries(CHAT.people).slice(-200)));
+  } catch (e) { console.warn(e); }
+}
+function chatPersonName(id) {
+  if (id === CHAT.uid) return getMemberName();
+  const p = CHAT.people[id]; return p ? p.username : '';
+}
+(function () { const p = chatLS('people'); if (p) Object.assign(CHAT.people, p); })();
+
+/* ---------- messages ---------- */
+function chatGetMsgs(cid) {
+  if (!CHAT.msgs[cid]) CHAT.msgs[cid] = chatLS('m.' + cid) || [];
+  return CHAT.msgs[cid];
+}
+function chatSaveMsgs(cid) { chatLS('m.' + cid, (CHAT.msgs[cid] || []).slice(-CHAT_MAX_CACHE)); }
+function chatMergeMsgs(cid, rows) {
+  const arr = chatGetMsgs(cid);
+  rows.forEach(m => {
+    if (arr.some(x => x.id === m.id)) return;
+    arr.push(m);
+    if (m.sender === CHAT.uid && m.client_id) chatOutboxRemove(m.client_id);
+  });
+  arr.sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+  chatSaveMsgs(cid);
+}
+async function chatLoadLatest(cid) {
+  if (!CHAT.uid) return;
+  try {
+    const { data, error } = await sb.from('messages').select('*').eq('conversation_id', cid).order('created_at', { ascending: false }).limit(40);
+    if (error) { console.warn(error); return; }
+    const rows = (data || []).reverse();
+    // Anything in the cache that is newer than the oldest fetched but missing was deleted
+    if (rows.length) {
+      const oldest = rows[0].created_at, ids = new Set(rows.map(r => r.id));
+      CHAT.msgs[cid] = chatGetMsgs(cid).filter(m => m.created_at < oldest || ids.has(m.id));
+    } else CHAT.msgs[cid] = [];
+    if (CHAT.more[cid] === undefined) CHAT.more[cid] = rows.length === 40;
+    chatMergeMsgs(cid, rows);
+    await chatPeople(rows.map(r => r.sender));
+    if (CHAT.openId === cid) { renderConv(true); chatMarkReadSoon(); }
+  } catch (e) { console.warn(e); }
+}
+async function chatLoadEarlier() {
+  const cid = CHAT.openId; if (!cid || !CHAT.uid) return;
+  const arr = chatGetMsgs(cid); if (!arr.length) return;
+  const body = document.getElementById('cc-body'), h0 = body.scrollHeight;
+  try {
+    const { data } = await sb.from('messages').select('*').eq('conversation_id', cid).lt('created_at', arr[0].created_at).order('created_at', { ascending: false }).limit(40);
+    CHAT.more[cid] = (data || []).length === 40;
+    chatMergeMsgs(cid, data || []);
+    await chatPeople((data || []).map(r => r.sender));
+    renderConv();
+    body.scrollTop = body.scrollHeight - h0;
+  } catch (e) { console.warn(e); }
+}
+function chatMarkReadSoon() { clearTimeout(CHAT.readTimer); CHAT.readTimer = setTimeout(chatMarkRead, 600); }
+async function chatMarkRead() {
+  const cid = CHAT.openId; if (!cid || !CHAT.uid || document.hidden) return;
+  const arr = chatGetMsgs(cid).filter(m => m.id); if (!arr.length) return;
+  const c = chatConv(cid); if (c) { c.unread = 0; chatSaveConvs(); chatUpdateBadges(); }
+  try {
+    await sb.from('conversation_members').update({ last_read_at: arr[arr.length - 1].created_at }).eq('conversation_id', cid).eq('user_id', CHAT.uid);
+  } catch (e) { console.warn(e); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && CHAT.uid) { chatLoadConvsSoon(); chatFlush(); if (CHAT.openId) chatLoadLatest(CHAT.openId); }
+});
+window.addEventListener('online', () => setTimeout(() => { if (CHAT.uid) chatFlush(); else if (chatTopLayer()) chatEnsureAuth(); }, 1200));
+
+/* ---------- opening a conversation ---------- */
+function openConv(cid) {
+  CHAT.openId = cid;
+  const c = chatConv(cid);
+  if (c) c.unread = 0;
+  document.getElementById('cc-input').value = '';
+  convInputGrow(document.getElementById('cc-input'));
+  document.getElementById('chat-conv').classList.add('show');
+  renderConvHeader();
+  renderConv(true);
+  chatUpdateBadges(); renderChatList();
+  chatEnsureAuth().then(ok => {
+    if (!ok) return;
+    if (c && c.kind !== 'dm') chatPeopleForConv(cid);
+    chatLoadLatest(cid);
+  });
+}
+async function chatPeopleForConv(cid) {
+  try {
+    const { data } = await sb.from('conversation_members').select('user_id').eq('conversation_id', cid);
+    await chatPeople((data || []).map(r => r.user_id));
+  } catch (e) {}
+}
+function closeConv() {
+  document.getElementById('chat-conv').classList.remove('show');
+  CHAT.openId = null;
+  renderChatList();
+}
+function renderConvHeader() {
+  const c = chatConv(CHAT.openId); if (!c) return;
+  const av = document.getElementById('cc-av');
+  av.outerHTML = chatConvAvatar(c, 'sm').replace('<div class="ch-av', '<div id="cc-av" onclick="convHeaderTap()" class="ch-av');
+  document.getElementById('cc-title').textContent = chatConvName(c);
+  let sub = '';
+  if (c.kind === 'dm') {
+    const f = chatFriendWith(c.other_id);
+    sub = f && f.status === 'accepted' ? 'Friend' : 'Squadmate';
+    if (CHAT.blocked.has(c.other_id)) sub = 'Blocked';
+  } else sub = (c.kind === 'squad' ? 'Squad chat · ' : 'Group · ') + c.member_count + ' member' + (c.member_count === 1 ? '' : 's');
+  document.getElementById('cc-sub').textContent = sub;
+}
+function convHeaderTap() {
+  const c = chatConv(CHAT.openId); if (!c) return;
+  if (c.kind === 'dm') chatOpenProfile(c.other_id);
+  else convMembers();
+}
+
+function renderConv(scrollEnd) {
+  const cid = CHAT.openId; if (!cid) return;
+  const c = chatConv(cid);
+  const list = document.getElementById('cc-list'), body = document.getElementById('cc-body');
+  const nearEnd = body.scrollHeight - body.scrollTop - body.clientHeight < 120;
+  const sent = chatGetMsgs(cid);
+  const pending = chatOutbox().filter(o => o.conversation_id === cid).map(o => Object.assign({}, o, { sender: CHAT.uid, _pending: true }));
+  const all = sent.concat(pending);
+  if (!all.length) {
+    list.innerHTML = '<div class="ch-empty"><b>' + esc(chatConvName(c)) + '</b>' + (c && c.kind === 'dm' ? 'Say hello 👋' : 'Nothing here yet — send the first message.') + '</div>';
+    return;
+  }
+  let html = CHAT.more[cid] ? '<button class="ch-btn cc-more" onclick="chatLoadEarlier()">Load earlier messages</button>' : '';
+  let lastDay = '', prev = null;
+  all.forEach((m, i) => {
+    const day = new Date(m.created_at).toDateString();
+    if (day !== lastDay) {
+      lastDay = day; prev = null;
+      const d = new Date(m.created_at), today = new Date().toDateString();
+      html += '<div class="cm-day">' + (day === today ? 'Today' : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) + '</div>';
+    }
+    const me = m.sender === CHAT.uid;
+    const name = me ? getMemberName() : (chatPersonName(m.sender) || 'someone');
+    const first = !prev || prev.sender !== m.sender || (new Date(m.created_at) - new Date(prev.created_at)) > 5 * 60000;
+    const next = all[i + 1];
+    const last = !next || next.sender !== m.sender || (new Date(next.created_at) - new Date(m.created_at)) > 5 * 60000 || new Date(next.created_at).toDateString() !== day;
+    const showName = first && !me && c && c.kind !== 'dm';
+    const pp = CHAT.people[m.sender];
+    let inner;
+    const key = m._pending ? 'o:' + m.client_id : 'm:' + m.id;
+    if (m.kind === 'pin') {
+      inner = '<div class="cm-pin" data-k="' + key + '"><div class="cm-pin-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></div>' +
+        '<div><div class="cm-pin-t">' + esc(m.label || 'Location') + '</div><div class="cm-pin-s">' + (+m.lat).toFixed(5) + ', ' + (+m.lng).toFixed(5) + ' · Show on map</div></div></div>';
+    } else if (m.kind === 'photo') {
+      inner = '<img class="cm-photo' + (m._pending ? ' pending' : '') + '" data-k="' + key + '" src="' + esc(m._pending ? (m.photoData || '') : m.photo_url) + '" alt="Photo" loading="lazy"/>';
+    } else inner = '<div class="cm-b" data-k="' + key + '">' + esc(m.body || '') + '</div>';
+    let meta = '';
+    if (m._pending) meta = m.failed ? '<div class="cm-meta fail" onclick="chatPendingMenu(\'' + m.client_id + '\')">' + esc(m.failed) + ' — tap for options</div>' : '<div class="cm-meta">Sending…</div>';
+    else if (last) meta = '<div class="cm-meta">' + new Date(m.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '</div>';
+    html += '<div class="cm' + (me ? ' me' : '') + (last ? ' first' : '') + '">' +
+      (me ? '' : chatAvatarHtml(name, pp && pp.avatar_url, 'sm')) +
+      '<div class="cm-col">' + (showName ? '<div class="cm-who" style="color:' + squadColor(name) + '">@' + esc(name) + '</div>' : '') + inner + meta + '</div></div>';
+    prev = m;
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('[data-k]').forEach(el => chatBindMsg(el));
+  if (scrollEnd || nearEnd) body.scrollTop = body.scrollHeight;
+  list.querySelectorAll('img.cm-photo').forEach(img => img.addEventListener('load', () => { if (scrollEnd || nearEnd) body.scrollTop = body.scrollHeight; }, { once: true }));
+}
+function chatFindMsg(key) {
+  const [t, id] = [key.slice(0, 1), key.slice(2)];
+  if (t === 'o') { const o = chatOutbox().find(x => x.client_id === id); return o ? Object.assign({ _pending: true, sender: CHAT.uid }, o) : null; }
+  return chatGetMsgs(CHAT.openId).find(x => x.id === id) || null;
+}
+function chatBindMsg(el) {
+  let timer = null, long = false;
+  const start = () => { long = false; timer = setTimeout(() => { long = true; const m = chatFindMsg(el.dataset.k); if (m) chatMsgMenu(m); }, 550); };
+  const stop = () => { clearTimeout(timer); };
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointerup', stop); el.addEventListener('pointerleave', stop); el.addEventListener('pointercancel', stop);
+  el.addEventListener('contextmenu', e => e.preventDefault());
+  el.addEventListener('click', () => {
+    if (long) return;
+    const m = chatFindMsg(el.dataset.k); if (!m) return;
+    if (m.kind === 'pin') chatShowPin(m);
+    else if (m.kind === 'photo') { document.getElementById('cc-viewer-img').src = m._pending ? m.photoData : m.photo_url; document.getElementById('cc-viewer').classList.add('show'); }
+  });
+}
+function chatMsgMenu(m) {
+  const items = [];
+  if (m.kind === 'text' && navigator.clipboard) items.push({ label: 'Copy text', fn: () => navigator.clipboard.writeText(m.body || '').then(() => toast('Copied', 'ok')).catch(() => {}) });
+  if (m.kind === 'pin') items.push({ label: 'Show on map', fn: () => chatShowPin(m) });
+  if (m.sender === CHAT.uid && !m._pending) items.push({ label: 'Delete for everyone', danger: true, fn: () => chatDeleteMsg(m) });
+  if (m._pending) items.push({ label: 'Delete (not sent)', danger: true, fn: () => { chatOutboxRemove(m.client_id); renderConv(); } });
+  if (m.sender !== CHAT.uid) items.push({ label: 'View @' + (chatPersonName(m.sender) || 'profile'), fn: () => chatOpenProfile(m.sender) });
+  if (!items.length) return;
+  chatSheet({ title: chatPreview(m).slice(0, 60), items });
+}
+async function chatDeleteMsg(m) {
+  try {
+    const { error } = await sb.from('messages').delete().eq('id', m.id);
+    if (error) { toast('Couldn\'t delete — check your signal', 'err'); return; }
+    chatOnDeleted({ id: m.id });
+  } catch (e) { toast('Couldn\'t delete — check your signal', 'err'); }
+}
+
+/* ---------- show a chat pin on the map ---------- */
+function chatShowPin(m) {
+  const lat = +m.lat, lng = +m.lng;
+  if (!isFinite(lat) || !isFinite(lng)) return;
+  chatCloseAll();
+  const s = document.getElementById('settings-screen'); if (s) s.classList.remove('show');
+  // On an open GeoPDF that covers the spot: show it there
+  if (APP.mode === 'pdf' && APP.fwd && typeof chatPdfShowPin === 'function' && chatPdfShowPin(lat, lng, m.label)) return;
+  skipToBasemap(); setActiveNav('map');
+  setTimeout(() => {
+    if (!APP.leaf) return;
+    try {
+      if (APP._chatPin) APP.leaf.removeLayer(APP._chatPin);
+      const who = chatPersonName(m.sender);
+      const icon = L.divIcon({ className: '', iconSize: [30, 40], iconAnchor: [15, 38],
+        html: '<svg viewBox="0 0 24 32" width="30" height="40"><path d="M12 1C6 1 2 5.5 2 11c0 7.5 10 20 10 20s10-12.5 10-20C22 5.5 18 1 12 1z" fill="#d9ff4f" stroke="#0a0d0c" stroke-width="1.5"/><circle cx="12" cy="11" r="4" fill="#0a0d0c"/></svg>' });
+      APP._chatPin = L.marker([lat, lng], { icon }).addTo(APP.leaf)
+        .bindPopup('<b>' + esc(m.label || 'Location') + '</b>' + (who ? '<br>from @' + esc(who) : '') + '<br><span style="font-size:11px">' + lat.toFixed(5) + ', ' + lng.toFixed(5) + '</span>');
+      APP.gps.follow = false;
+      APP.leaf.setView([lat, lng], Math.max(APP.leaf.getZoom() || 15, 16));
+      APP._chatPin.openPopup();
+    } catch (e) { console.warn(e); }
+  }, 250);
+}
+
+/* ---------- sending (outbox) ---------- */
+function chatOutbox() { return chatLS('outbox') || []; }
+function chatOutboxSave(list) { chatLS('outbox', list); }
+function chatOutboxRemove(clientId) { chatOutboxSave(chatOutbox().filter(o => o.client_id !== clientId)); }
+function chatQueue(item) {
+  const o = Object.assign({ client_id: chatUuid(), conversation_id: CHAT.openId, created_at: new Date().toISOString() }, item);
+  const list = chatOutbox(); list.push(o); chatOutboxSave(list);
+  renderConv(true);
+  chatFlush();
+}
+function convInputGrow(t) { t.style.height = 'auto'; t.style.height = Math.min(120, t.scrollHeight) + 'px'; }
+function convKey(e) { if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) { e.preventDefault(); convSendText(); } }
+function convSendText() {
+  const t = document.getElementById('cc-input');
+  const body = t.value.trim();
+  if (!body || !CHAT.openId) return;
+  t.value = ''; convInputGrow(t);
+  chatQueue({ kind: 'text', body: body.slice(0, 4000) });
+  try { t.focus(); } catch (e) {}
+}
+async function chatFlush() {
+  if (CHAT.flushing || !CHAT.uid || !navigator.onLine) return;
+  CHAT.flushing = true;
+  try {
+    for (const o of chatOutbox()) {
+      if (o.failed && o.permanent) continue;
+      const r = await chatSendOne(o);
+      if (r === 'offline') break;
+    }
+  } finally { CHAT.flushing = false; }
+  if (CHAT.openId) renderConv();
+}
+async function chatSendOne(o) {
+  const setFail = (msg, permanent) => {
+    const list = chatOutbox(); const x = list.find(y => y.client_id === o.client_id);
+    if (x) { x.failed = msg; x.permanent = !!permanent; chatOutboxSave(list); }
+  };
+  try {
+    let photoUrl = o.photo_url || null;
+    if (o.kind === 'photo' && !photoUrl) {
+      const blob = dataUrlToBlobSafe(o.photoData);
+      const path = o.conversation_id + '/' + o.client_id + '.jpg';
+      const up = await sb.storage.from('chat-media').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+      if (up.error && !/exist|duplicate/i.test(up.error.message || '')) {
+        console.warn('photo upload', up.error);
+        if (!navigator.onLine) return 'offline';
+        setFail('Photo didn\'t upload'); return 'fail';
+      }
+      photoUrl = sb.storage.from('chat-media').getPublicUrl(path).data.publicUrl;
+      const list = chatOutbox(); const x = list.find(y => y.client_id === o.client_id);
+      if (x) { x.photo_url = photoUrl; chatOutboxSave(list); }
+    }
+    const row = { conversation_id: o.conversation_id, kind: o.kind, client_id: o.client_id };
+    if (o.kind === 'text') row.body = o.body;
+    if (o.kind === 'pin') { row.lat = o.lat; row.lng = o.lng; row.label = (o.label || '').slice(0, 80) || null; }
+    if (o.kind === 'photo') { row.photo_url = photoUrl; if (o.body) row.body = o.body; }
+    const { data, error } = await sb.from('messages').insert(row).select().single();
+    if (error) {
+      if (error.code === '23505') { chatOutboxRemove(o.client_id); chatLoadLatest(o.conversation_id); return 'ok'; }  // already sent
+      if (error.code === '42501') { setFail('Can\'t send here any more', true); return 'fail'; }
+      console.warn('send', error);
+      if (!navigator.onLine || /fetch|network/i.test(error.message || '')) return 'offline';
+      setFail('Not sent'); return 'fail';
+    }
+    chatOutboxRemove(o.client_id);
+    chatOnMessage(data);
+    return 'ok';
+  } catch (e) {
+    console.warn('send', e);
+    return 'offline';
+  }
+}
+function chatPendingMenu(clientId) {
+  chatSheet({ title: 'Message not sent', items: [
+    { label: 'Try again', fn: () => { const l = chatOutbox(); const x = l.find(y => y.client_id === clientId); if (x) { delete x.failed; delete x.permanent; chatOutboxSave(l); } renderConv(); chatFlush(); } },
+    { label: 'Delete it', danger: true, fn: () => { chatOutboxRemove(clientId); renderConv(); } }
+  ] });
+}
+
+/* ---------- attach: pin / photo ---------- */
+function convAttach() {
+  const items = [
+    { label: 'Send my location', hint: 'Where you\'re standing now', ico: '◎', fn: convSendMyLocation },
+  ];
+  const pins = (TOOL.plainPins || []).filter(p => isFinite(+p.lat) && isFinite(+p.lng));
+  if (pins.length) items.push({ label: 'Send a pin from this map', hint: pins.length + ' pin' + (pins.length > 1 ? 's' : '') + ' on ' + (APP.fileName || 'the map'), ico: '📍', fn: convPickPin });
+  items.push({ label: 'Photo', hint: 'Take one or pick from your gallery', ico: '📷', fn: () => document.getElementById('cc-photo-input').click() });
+  chatSheet({ title: 'Send', items });
+}
+function convSendMyLocation() {
+  const send = (lat, lng, acc) => chatQueue({ kind: 'pin', lat: +lat.toFixed(6), lng: +lng.toFixed(6), label: 'My location' + (acc ? ' (±' + Math.round(acc) + ' m)' : '') });
+  if (APP.gps && APP.gps.active && APP.gps.lat != null) { send(APP.gps.lat, APP.gps.lng, APP.gps.accuracy); return; }
+  if (!navigator.geolocation) { toast('No GPS on this device', 'err'); return; }
+  toast('Getting your location…', 'info');
+  navigator.geolocation.getCurrentPosition(
+    p => send(p.coords.latitude, p.coords.longitude, p.coords.accuracy),
+    () => toast('Couldn\'t get your location — is GPS on?', 'err'),
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 15000 });
+}
+function convPickPin() {
+  const pins = (TOOL.plainPins || []).filter(p => isFinite(+p.lat) && isFinite(+p.lng));
+  chatSheet({ title: 'Which pin?', sub: APP.fileName || '', items: pins.slice(0, 30).map((p, i) => ({
+    label: p.label || ('Pin ' + (i + 1)), hint: (+p.lat).toFixed(5) + ', ' + (+p.lng).toFixed(5), ico: '📍',
+    fn: () => chatQueue({ kind: 'pin', lat: +(+p.lat).toFixed(6), lng: +(+p.lng).toFixed(6), label: (p.label || ('Pin ' + (i + 1))).slice(0, 80) })
+  })) });
+}
+async function onConvPhoto(file) {
+  document.getElementById('cc-photo-input').value = '';
+  if (!file || !CHAT.openId) return;
+  const data = await compressPhoto(file, 1280);
+  if (!data) { toast('Couldn\'t read that photo', 'err'); return; }
+  chatQueue({ kind: 'photo', photoData: data });
+}
+
+/* ---------- conversation menus ---------- */
+function convMenu() {
+  const c = chatConv(CHAT.openId); if (!c) return;
+  if (c.kind === 'dm') {
+    const blocked = CHAT.blocked.has(c.other_id);
+    chatSheet({ title: chatConvName(c), items: [
+      { label: 'View profile', fn: () => chatOpenProfile(c.other_id) },
+      blocked ? { label: 'Unblock', fn: () => chatUnblock(c.other_id) }
+              : { label: 'Block @' + (c.other_username || ''), danger: true, fn: () => chatBlock(c.other_id, c.other_username) }
+    ] });
+  } else if (c.kind === 'group') {
+    chatSheet({ title: chatConvName(c), sub: c.member_count + ' members', items: [
+      { label: 'Members', fn: convMembers },
+      { label: 'Add people', fn: () => openNewChat('add', c.id) },
+      { label: 'Leave group', danger: true, fn: () => chatLeave(c) }
+    ] });
+  } else {
+    chatSheet({ title: chatConvName(c), sub: 'Everyone in your squad is in this chat', items: [
+      { label: 'Members', fn: convMembers },
+      { label: 'Open squad', fn: () => { openSquad(); } }
+    ] });
+  }
+}
+async function convMembers() {
+  const c = chatConv(CHAT.openId); if (!c || !CHAT.uid) return;
+  let ids = [];
+  try { const { data } = await sb.from('conversation_members').select('user_id').eq('conversation_id', c.id); ids = (data || []).map(r => r.user_id); } catch (e) {}
+  await chatPeople(ids);
+  chatSheet({ title: chatConvName(c), sub: ids.length + ' members', items: ids.map(id => ({
+    label: id === CHAT.uid ? '@' + getMemberName() + ' (you)' : '@' + (chatPersonName(id) || '…'),
+    avatar: chatAvatarHtml(id === CHAT.uid ? getMemberName() : chatPersonName(id), id === CHAT.uid ? myAvatarSrc() : (CHAT.people[id] || {}).avatar_url, 'sm'),
+    fn: () => chatOpenProfile(id)
+  })) });
+}
+async function chatLeave(c) {
+  try {
+    const { error } = await sb.from('conversation_members').delete().eq('conversation_id', c.id).eq('user_id', CHAT.uid);
+    if (error) { toast('Couldn\'t leave — check your signal', 'err'); return; }
+    CHAT.convs = CHAT.convs.filter(x => x.id !== c.id); chatSaveConvs(); chatLS('m.' + c.id, null);
+    closeConv(); toast('Left ' + chatConvName(c), 'info');
+  } catch (e) { toast('Couldn\'t leave — check your signal', 'err'); }
+}
+
+/* ---------- generic sheet ---------- */
+let _chatSheetItems = [];
+function chatSheet(o) {
+  _chatSheetItems = o.items || [];
+  const el = document.getElementById('ch-sheet');
+  el.innerHTML = '<div class="as-head"><div class="as-title">' + esc(o.title || '') + '</div>' + (o.sub ? '<div class="as-sub">' + esc(o.sub) + '</div>' : '') + '</div>' +
+    _chatSheetItems.map((it, i) => '<button class="as-btn' + (it.danger ? ' danger' : '') + '" onclick="chatSheetPick(' + i + ')">' +
+      (it.avatar || '<span class="as-ico">' + esc(it.ico || '›') + '</span>') +
+      '<div style="text-align:left;min-width:0"><div>' + esc(it.label) + '</div>' + (it.hint ? '<div class="mo-hint">' + esc(it.hint) + '</div>' : '') + '</div></button>').join('') +
+    '<button class="as-btn cancel" onclick="closeChatSheet()">Cancel</button>';
+  document.getElementById('ch-sheet-backdrop').classList.add('show');
+  el.classList.add('show');
+}
+function chatSheetPick(i) { const it = _chatSheetItems[i]; closeChatSheet(); if (it && it.fn) setTimeout(it.fn, 50); }
+function closeChatSheet() {
+  const b = document.getElementById('ch-sheet-backdrop'), s = document.getElementById('ch-sheet');
+  if (b) b.classList.remove('show'); if (s) s.classList.remove('show');
+}
+
+/* ---------- friends ---------- */
+function chatLoadFriendsSoon() { clearTimeout(CHAT.frTimer); CHAT.frTimer = setTimeout(chatLoadFriends, 400); }
+async function chatLoadFriends() {
+  if (!CHAT.uid) return;
+  try {
+    const [fr, bl, ct] = await Promise.all([
+      sb.from('friendships').select('*'),
+      sb.from('blocks').select('blocked'),
+      sb.rpc('fft_contacts')
+    ]);
+    CHAT.friendships = (fr && fr.data) || [];
+    CHAT.blocked = new Set(((bl && bl.data) || []).map(r => r.blocked));
+    CHAT.contacts = (ct && ct.data) || [];
+    CHAT.contacts.forEach(p => { CHAT.people[p.id] = Object.assign({}, CHAT.people[p.id], { id: p.id, username: p.username, avatar_url: p.avatar_url }); });
+    await chatPeople(CHAT.friendships.map(f => f.requester === CHAT.uid ? f.addressee : f.requester));
+    chatUpdateBadges();
+    if (document.getElementById('friends-screen').classList.contains('show')) renderFriends();
+    if (CHAT.openId) renderConvHeader();
+  } catch (e) { console.warn(e); }
+}
+function chatOther(f) { return f.requester === CHAT.uid ? f.addressee : f.requester; }
+function chatIncoming() { return CHAT.friendships.filter(f => f.status === 'pending' && f.addressee === CHAT.uid); }
+function chatFriendWith(uid) { return CHAT.friendships.find(f => chatOther(f) === uid) || null; }
+function openFriends() {
+  document.getElementById('friends-screen').classList.add('show');
+  document.getElementById('fr-name').value = '';
+  renderFriends();
+  chatEnsureAuth().then(ok => { if (ok) chatLoadFriends(); });
+}
+function closeFriends() { document.getElementById('friends-screen').classList.remove('show'); }
+function chatPersonRow(uid, right, sub) {
+  const p = CHAT.people[uid] || {};
+  return '<div class="ch-row" onclick="chatOpenProfile(\'' + uid + '\')">' + chatAvatarHtml(p.username, p.avatar_url) +
+    '<div class="ch-mid"><div class="ch-name">@' + esc(p.username || '…') + '</div>' + (sub ? '<div class="ch-prev">' + esc(sub) + '</div>' : '') + '</div>' +
+    '<div class="ch-btns" onclick="event.stopPropagation()">' + right + '</div></div>';
+}
+function renderFriends() {
+  const el = document.getElementById('fr-list'); if (!el) return;
+  if (!CHAT.uid) { el.innerHTML = CHAT.state === 'idle' ? '<div class="ch-empty">Connecting…</div>' : ''; return; }
+  const inc = chatIncoming(), out = CHAT.friendships.filter(f => f.status === 'pending' && f.requester === CHAT.uid);
+  const acc = CHAT.friendships.filter(f => f.status === 'accepted');
+  const friendIds = new Set(CHAT.friendships.map(chatOther));
+  const mates = CHAT.contacts.filter(p => p.is_squadmate && !friendIds.has(p.id));
+  let h = '';
+  if (inc.length) h += '<div class="ch-sec">Friend requests</div>' + inc.map(f => chatPersonRow(f.requester,
+    '<button class="ch-btn lime" onclick="friendRespond(\'' + f.id + '\',true)">Accept</button><button class="ch-btn" onclick="friendRespond(\'' + f.id + '\',false)">Decline</button>', 'Wants to be friends')).join('');
+  h += '<div class="ch-sec">Friends' + (acc.length ? ' · ' + acc.length : '') + '</div>';
+  h += acc.length ? acc.map(f => chatPersonRow(chatOther(f), '<button class="ch-btn lime" onclick="chatMessage(\'' + chatOther(f) + '\')">Message</button>')).join('')
+    : '<div class="cc-note">No friends yet — add someone by their username above.</div>';
+  if (out.length) h += '<div class="ch-sec">Sent</div>' + out.map(f => chatPersonRow(f.addressee, '<button class="ch-btn" onclick="friendRemove(\'' + f.id + '\',\'Request cancelled\')">Cancel</button>', 'Waiting for them to accept')).join('');
+  if (mates.length) h += '<div class="ch-sec">In your squad</div>' + mates.map(p => chatPersonRow(p.id,
+    '<button class="ch-btn" onclick="chatMessage(\'' + p.id + '\')">Message</button><button class="ch-btn lime" onclick="friendAddName(\'' + esc(p.username) + '\')">Add</button>')).join('');
+  el.innerHTML = h;
+}
+function friendAdd() {
+  const name = cleanUsername(document.getElementById('fr-name').value);
+  if (!name) { toast('Type their username', 'info'); return; }
+  friendAddName(name);
+}
+async function friendAddName(name) {
+  if (!(await chatEnsureAuth())) { toast('Needs signal to add friends', 'err'); return; }
+  if (name.toLowerCase() === getMemberName().toLowerCase()) { toast('That\'s you!', 'info'); return; }
+  try {
+    const { data, error } = await sb.rpc('fft_send_friend_request', { p_username: name });
+    if (error) { console.warn(error); toast('Couldn\'t send — check your signal', 'err'); return; }
+    const msg = {
+      sent: ['Friend request sent to @' + name, 'ok'], accepted: ['You\'re now friends with @' + name, 'ok'],
+      already: ['You\'re already friends with @' + name, 'info'], pending: ['Request already sent to @' + name, 'info'],
+      not_found: ['No one called @' + name + ' — check the spelling', 'err'], self: ['That\'s you!', 'info'],
+      blocked: ['Can\'t add @' + name, 'err'], no_profile: ['Still setting up — try again in a moment', 'info']
+    }[data] || ['Done', 'ok'];
+    toast(msg[0], msg[1]);
+    if (data === 'sent' || data === 'accepted') document.getElementById('fr-name').value = '';
+    if (data === 'no_profile') chatSyncProfile();
+    chatLoadFriends();
+  } catch (e) { toast('Couldn\'t send — check your signal', 'err'); }
+}
+async function friendRespond(id, accept) {
+  try {
+    const r = accept ? await sb.rpc('fft_respond_friend', { p_id: id, p_accept: true }) : await sb.from('friendships').delete().eq('id', id);
+    if (r.error) { toast('Couldn\'t do that — check your signal', 'err'); return; }
+    toast(accept ? 'Friend added' : 'Request declined', accept ? 'ok' : 'info');
+  } catch (e) { toast('Couldn\'t do that — check your signal', 'err'); }
+  chatLoadFriends();
+}
+async function friendRemove(id, msg) {
+  try {
+    const { error } = await sb.from('friendships').delete().eq('id', id);
+    if (error) { toast('Couldn\'t do that — check your signal', 'err'); return; }
+    toast(msg || 'Removed', 'info');
+  } catch (e) { toast('Couldn\'t do that — check your signal', 'err'); }
+  chatLoadFriends();
+}
+async function chatBlock(uid, name) {
+  if (!(await chatEnsureAuth())) return;
+  try {
+    const { error } = await sb.from('blocks').insert({ blocker: CHAT.uid, blocked: uid });
+    if (error && error.code !== '23505') { toast('Couldn\'t block — check your signal', 'err'); return; }
+    const f = chatFriendWith(uid); if (f) await sb.from('friendships').delete().eq('id', f.id);
+    CHAT.blocked.add(uid);
+    toast('Blocked @' + (name || chatPersonName(uid)) + ' — they can\'t message you', 'info');
+    closeMemberProfile();
+  } catch (e) { toast('Couldn\'t block — check your signal', 'err'); }
+  chatLoadFriends();
+}
+async function chatUnblock(uid) {
+  try { await sb.from('blocks').delete().eq('blocker', CHAT.uid).eq('blocked', uid); CHAT.blocked.delete(uid); toast('Unblocked', 'ok'); } catch (e) {}
+  chatLoadFriends();
+}
+async function chatMessage(uid) {
+  if (!(await chatEnsureAuth())) { toast('Needs signal to start a chat', 'err'); return; }
+  try {
+    const { data, error } = await sb.rpc('fft_start_dm', { p_other: uid });
+    if (error) { toast(/not_allowed/.test(error.message || '') ? 'You can message friends and squadmates' : 'Couldn\'t start chat — check your signal', 'err'); return; }
+    await chatLoadConvs();
+    closeMemberProfile(); closeFriends(); closeNewChat();
+    document.getElementById('chat-screen').classList.add('show'); setActiveNav('chat');
+    openConv(data);
+  } catch (e) { toast('Couldn\'t start chat — check your signal', 'err'); }
+}
+
+/* ---------- profiles of chat people ---------- */
+async function chatOpenProfile(uid) {
+  if (!uid) return;
+  if (uid === CHAT.uid) { chatCloseAll(); openSettings(); return; }
+  await chatPeople([uid]);
+  const p = CHAT.people[uid] || {};
+  const sqm = p.device_id && typeof SQV !== 'undefined' && SQV.byDevice && SQV.byDevice[p.device_id];
+  if (sqm) { await openMemberProfile({ device_id: p.device_id, member_name: sqm.name }, ''); return; }
+  const name = p.username || 'someone', colour = squadColor(name);
+  const av = document.getElementById('mp-avatar');
+  av.style.borderColor = colour; av.style.background = colour + '22'; av.style.color = colour;
+  av.innerHTML = p.avatar_url ? '<img src="' + esc(p.avatar_url) + '" alt=""/>' : esc(name.charAt(0).toUpperCase());
+  document.getElementById('mp-context').textContent = '';
+  document.getElementById('mp-handle').textContent = '@' + name;
+  const f = chatFriendWith(uid);
+  const meta = [f && f.status === 'accepted' ? 'Friend' : (CHAT.contacts.some(c => c.id === uid && c.is_squadmate) ? 'Squadmate' : '')];
+  if (p.exp) meta.push(p.exp + ' experience');
+  document.getElementById('mp-meta').textContent = meta.filter(Boolean).join(' · ');
+  document.getElementById('mp-bio').textContent = p.bio || '';
+  document.getElementById('mp-tickets').innerHTML = (p.tickets || []).map(t => '<span class="pf-chip on small">' + esc(t) + '</span>').join('');
+  document.getElementById('mp-stats').textContent = '';
+  chatRenderProfileActions(uid);
+  document.getElementById('mp-backdrop').classList.add('show');
+  document.getElementById('mp-sheet').classList.add('show');
+}
+/* Message / Add friend / Block buttons on a profile sheet.
+   Called with a user id, or with a device id (squad members). */
+async function chatRenderProfileActions(uid, deviceId) {
+  const el = document.getElementById('mp-actions'); if (!el) return;
+  el.innerHTML = '';
+  if (deviceId && deviceId === getDeviceId()) return;
+  if (!(await chatEnsureAuth())) return;
+  if (!uid && deviceId) {
+    try { const { data } = await sb.from('profiles').select('id,username,avatar_url,device_id').eq('device_id', deviceId).maybeSingle(); if (data) { uid = data.id; CHAT.people[uid] = Object.assign({}, CHAT.people[uid], data); } } catch (e) {}
+  }
+  if (!uid || uid === CHAT.uid) return;
+  if (!CHAT.friendships.length && !CHAT.contacts.length) await chatLoadFriends();
+  const f = chatFriendWith(uid), blocked = CHAT.blocked.has(uid);
+  const name = chatPersonName(uid) || '';
+  let h = '';
+  if (blocked) h = '<button class="ch-btn" onclick="chatUnblock(\'' + uid + '\');closeMemberProfile()">Unblock</button>';
+  else {
+    h += '<button class="ch-btn lime" onclick="chatMessage(\'' + uid + '\')">Message</button>';
+    if (!f) h += '<button class="ch-btn" onclick="friendAddName(\'' + esc(name) + '\');closeMemberProfile()">Add friend</button>';
+    else if (f.status === 'pending' && f.addressee === CHAT.uid) h += '<button class="ch-btn" onclick="friendRespond(\'' + f.id + '\',true);closeMemberProfile()">Accept friend</button>';
+    else if (f.status === 'pending') h += '<button class="ch-btn" disabled style="opacity:.6">Requested</button>';
+    else h += '<button class="ch-btn" onclick="chatConfirmUnfriend(\'' + f.id + '\',\'' + esc(name) + '\')">Friends ✓</button>';
+    h += '<button class="ch-btn red" onclick="chatBlock(\'' + uid + '\')">Block</button>';
+  }
+  // Only fill in if the sheet still shows this person
+  if (document.getElementById('mp-handle').textContent.replace(/^@/, '') === name || !name) el.innerHTML = h;
+}
+function chatConfirmUnfriend(id, name) {
+  closeMemberProfile();
+  chatSheet({ title: '@' + name, items: [{ label: 'Remove friend', danger: true, fn: () => friendRemove(id, 'Removed @' + name) }] });
+}
+
+/* ---------- new chat / new group / add people ---------- */
+function openNewChat(mode, convId) {
+  CHAT.newMode = mode; CHAT.addTo = convId || null; CHAT.newPicked = new Set();
+  document.getElementById('cn-title').textContent = mode === 'group' ? 'New group' : mode === 'add' ? 'Add people' : 'New chat';
+  document.getElementById('cn-name-wrap').style.display = mode === 'group' ? 'block' : 'none';
+  document.getElementById('cn-name').value = '';
+  document.getElementById('cn-go').style.display = mode === 'dm' ? 'none' : 'flex';
+  document.getElementById('cn-go').textContent = mode === 'add' ? 'Add' : 'Create';
+  document.getElementById('chat-new').classList.add('show');
+  renderNewChat();
+  chatEnsureAuth().then(async ok => {
+    if (!ok) return;
+    await chatLoadFriends();
+    if (mode === 'add' && convId) {
+      try { const { data } = await sb.from('conversation_members').select('user_id').eq('conversation_id', convId); CHAT._inConv = new Set((data || []).map(r => r.user_id)); } catch (e) { CHAT._inConv = new Set(); }
+    }
+    renderNewChat();
+  });
+}
+function closeNewChat() { document.getElementById('chat-new').classList.remove('show'); }
+function renderNewChat() {
+  const el = document.getElementById('cn-list');
+  let people = CHAT.contacts.filter(p => !CHAT.blocked.has(p.id));
+  if (CHAT.newMode === 'add' && CHAT._inConv) people = people.filter(p => !CHAT._inConv.has(p.id));
+  let h = '';
+  if (CHAT.newMode === 'dm') h += '<div class="ch-row" onclick="openNewChat(\'group\')"><div class="ch-av sq">+</div><div class="ch-mid"><div class="ch-name">New group</div><div class="ch-prev">Pick a few friends or squadmates</div></div></div>';
+  if (!CHAT.uid) h += '<div class="ch-empty">' + (CHAT.state === 'idle' ? 'Connecting…' : 'Needs signal') + '</div>';
+  else if (!people.length) h += '<div class="ch-empty"><b>No one to add yet</b>You can chat with friends and people in your squad.<div style="margin-top:14px"><button class="ch-btn lime" onclick="closeNewChat();openFriends()">Add friends</button></div></div>';
+  else {
+    h += '<div class="ch-sec">Friends &amp; squadmates</div>';
+    h += people.map(p => {
+      const on = CHAT.newPicked.has(p.id);
+      const sub = [p.is_friend ? 'Friend' : '', p.is_squadmate ? 'Squad' : ''].filter(Boolean).join(' · ');
+      return '<div class="ch-row' + (on ? ' on' : '') + '" onclick="newChatTap(\'' + p.id + '\')">' + chatAvatarHtml(p.username, p.avatar_url) +
+        '<div class="ch-mid"><div class="ch-name">@' + esc(p.username || '') + '</div><div class="ch-prev">' + sub + '</div></div>' +
+        (CHAT.newMode === 'dm' ? '' : '<div class="cn-pick">' + (on ? '✓' : '') + '</div>') + '</div>';
+    }).join('');
+  }
+  el.innerHTML = h;
+}
+function newChatTap(uid) {
+  if (CHAT.newMode === 'dm') { chatMessage(uid); return; }
+  if (CHAT.newPicked.has(uid)) CHAT.newPicked.delete(uid); else CHAT.newPicked.add(uid);
+  renderNewChat();
+}
+async function newChatGo() {
+  const ids = [...CHAT.newPicked];
+  if (!ids.length) { toast('Pick at least one person', 'info'); return; }
+  try {
+    if (CHAT.newMode === 'group') {
+      const name = document.getElementById('cn-name').value.trim() || ids.map(id => chatPersonName(id)).slice(0, 3).join(', ');
+      const { data, error } = await sb.rpc('fft_create_group', { p_name: name.slice(0, 40), p_members: ids });
+      if (error) { toast('Couldn\'t make the group — check your signal', 'err'); return; }
+      await chatLoadConvs(); closeNewChat(); openConv(data);
+      toast('Group made', 'ok');
+    } else if (CHAT.newMode === 'add' && CHAT.addTo) {
+      let ok = 0;
+      for (const id of ids) { const { error } = await sb.rpc('fft_add_to_group', { p_conv: CHAT.addTo, p_user: id }); if (!error) ok++; }
+      await chatLoadConvs(); closeNewChat();
+      toast(ok ? 'Added ' + ok + ' ' + (ok > 1 ? 'people' : 'person') : 'Couldn\'t add — check your signal', ok ? 'ok' : 'err');
+    }
+  } catch (e) { toast('Couldn\'t do that — check your signal', 'err'); }
+}
+
+/* =========================================================
+   PUSH NOTIFICATIONS (Firebase). Only switched on in app builds
+   that include google-services.json (the build sets FFT_BUILD.push) —
+   without it, Android would crash on register().
+   ========================================================= */
+let _pushStarted = false;
+async function chatPushInit() {
+  if (_pushStarted || !CHAT.uid) return;
+  if (!(window.FFT_BUILD && window.FFT_BUILD.push)) return;
+  const PN = capPlugin('PushNotifications');
+  if (!PN) return;
+  _pushStarted = true;
+  try {
+    await PN.addListener('registration', async t => {
+      const token = t && t.value; if (!token) return;
+      try { localStorage.setItem('fft.pushToken', token); } catch (e) {}
+      try {
+        await sb.from('push_tokens').upsert({ token, user_id: CHAT.uid, platform: 'android', updated_at: new Date().toISOString() }, { onConflict: 'token' });
+      } catch (e) { console.warn('push token', e); }
+    });
+    await PN.addListener('registrationError', e => console.warn('push register', e));
+    // Tapped a notification: open that chat
+    await PN.addListener('pushNotificationActionPerformed', a => {
+      const cid = a && a.notification && a.notification.data && a.notification.data.conv;
+      if (cid) chatOpenFromPush(cid);
+    });
+    // In the app already: realtime shows it, nothing to do
+    await PN.addListener('pushNotificationReceived', () => {});
+    try { await PN.createChannel({ id: 'chat', name: 'Chat messages', description: 'Messages from friends, groups and your squad', importance: 4, visibility: 1, vibration: true }); } catch (e) {}
+    let perm = await PN.checkPermissions();
+    if (perm.receive === 'prompt' || perm.receive === 'prompt-with-rationale') perm = await PN.requestPermissions();
+    if (perm.receive !== 'granted') { _pushStarted = false; return; }
+    await PN.register();
+  } catch (e) { console.warn('push init', e); _pushStarted = false; }
+}
+async function chatOpenFromPush(cid) {
+  const go = async () => {
+    if (!(await chatEnsureAuth())) return;
+    await chatLoadConvs();
+    const s = document.getElementById('settings-screen'); if (s) s.classList.remove('show');
+    document.getElementById('chat-screen').classList.add('show'); setActiveNav('chat');
+    openConv(cid);
+  };
+  if (document.readyState === 'complete') setTimeout(go, 300); else window.addEventListener('load', () => setTimeout(go, 1200));
+}
+
+/* ---------- start-up ---------- */
+setTimeout(() => {
+  CHAT.convs = chatLS('convs') || [];
+  chatUpdateBadges();
+  if (getMemberName() && navigator.onLine) chatEnsureAuth();
+}, 4000);
+// Android back button: step back through the chat screens
+setTimeout(() => {
+  const App = typeof capPlugin === 'function' ? capPlugin('App') : null;
+  if (!App) return;
+  try {
+    App.addListener('backButton', ev => {
+      const viewer = document.getElementById('cc-viewer');
+      if (viewer.classList.contains('show')) { viewer.classList.remove('show'); return; }
+      if (document.getElementById('ch-sheet').classList.contains('show')) { closeChatSheet(); return; }
+      if (document.getElementById('mp-sheet').classList.contains('show')) { closeMemberProfile(); return; }
+      const top = chatTopLayer();
+      if (top === 'chat-new') return closeNewChat();
+      if (top === 'friends-screen') return closeFriends();
+      if (top === 'chat-conv') return closeConv();
+      if (top === 'chat-screen') return bnHome();
+      const sq = document.getElementById('squad-panel');
+      if (sq && sq.classList.contains('show')) return closeSquad();
+      const st = document.getElementById('settings-screen');
+      if (st && st.classList.contains('show')) return bnHome();
+      if (ev && ev.canGoBack) { history.back(); return; }
+      if (App.minimizeApp) App.minimizeApp();
+    });
+  } catch (e) { console.warn(e); }
+}, 1000);
+
 </script>
 
 <!-- =========================================================
      SETTINGS SCREEN
      ========================================================= -->
+<div class="sheet-backdrop" id="mo-backdrop" onclick="closeMapOpenSheet()"></div>
+<div class="action-sheet" id="mo-sheet">
+  <div class="as-head">
+    <div class="as-title" id="mo-title">Map</div>
+    <div class="as-sub" id="mo-sub"></div>
+  </div>
+  <button class="as-btn mo-btn" onclick="chooseMapOpen('squad')">
+    <div class="as-ico"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    <div><div>Open squad map</div><div class="mo-hint">Everyone's tracks, pins and live positions</div></div>
+  </button>
+  <button class="as-btn mo-btn" onclick="chooseMapOpen('mine')">
+    <div class="as-ico"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <div><div>Open my map</div><div class="mo-hint">Just your own work — squad hidden</div></div>
+  </button>
+  <button class="as-btn cancel" onclick="closeMapOpenSheet()">Cancel</button>
+</div>
 <div class="sheet-backdrop" id="mp-backdrop" onclick="closeMemberProfile()"></div>
 <div class="action-sheet" id="mp-sheet">
   <div class="mp-context" id="mp-context"></div>
@@ -10203,8 +11644,118 @@ window.addEventListener('resize', () => {
   <div class="mp-bio" id="mp-bio"></div>
   <div class="pf-chips" id="mp-tickets"></div>
   <div class="mp-stats" id="mp-stats"></div>
+  <div id="mp-actions"></div>
   <button class="as-btn cancel" onclick="closeMemberProfile()">Close</button>
 </div>
+<!-- =========================================================
+     CHAT + FRIENDS
+     ========================================================= -->
+<div class="chat-layer" id="chat-screen">
+  <div class="ch-head">
+    <button class="ch-ibtn" onclick="openFriends()" aria-label="Friends">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      <span id="ch-fr-dot" class="ch-dot" style="display:none"></span>
+    </button>
+    <div class="ch-title center">CHAT</div>
+    <button class="ch-ibtn lime" onclick="openNewChat('dm')" aria-label="New chat">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
+  <div class="ch-body" style="padding-bottom:90px">
+    <div class="ch-status" id="ch-status"></div>
+    <div id="ch-list"></div>
+  </div>
+  <div class="bottom-nav" style="position:absolute;bottom:0;left:0;right:0;">
+    <button class="bn-btn" onclick="bnHome()">
+      <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span>
+      <span class="bn-label">Home</span>
+    </button>
+    <button class="bn-btn" onclick="bnMap()">
+      <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 8 3 16 6 23 3 23 18 16 21 8 18 1 21"/><line x1="8" y1="3" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="21"/></svg></span>
+      <span class="bn-label">Map</span>
+    </button>
+    <button class="bn-btn" onclick="openSquad()">
+      <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="bn-label">Squad</span>
+    </button>
+    <button class="bn-btn active" onclick="openChat()">
+      <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="bn-label">Chat</span><span class="bn-badge"></span>
+    </button>
+    <button class="bn-btn" onclick="openSettings()">
+      <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <span class="bn-label">Profile</span>
+    </button>
+  </div>
+</div>
+
+<div class="chat-layer" id="chat-conv">
+  <div class="ch-head">
+    <button class="ch-ibtn" onclick="closeConv()" aria-label="Back">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div id="cc-av" class="ch-av sm" onclick="convHeaderTap()"></div>
+    <div class="ch-mid" onclick="convHeaderTap()">
+      <div class="ch-title" id="cc-title"></div>
+      <div class="ch-sub" id="cc-sub"></div>
+    </div>
+    <button class="ch-ibtn" onclick="convMenu()" aria-label="Options">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+    </button>
+  </div>
+  <div class="ch-body" id="cc-body">
+    <div class="ch-status" id="cc-status"></div>
+    <div id="cc-list"></div>
+  </div>
+  <div class="cc-bar">
+    <button class="cc-ib" onclick="convAttach()" aria-label="Send a pin or photo">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <textarea id="cc-input" rows="1" maxlength="4000" placeholder="Message" oninput="convInputGrow(this)" onkeydown="convKey(event)"></textarea>
+    <button class="cc-ib send" onclick="convSendText()" aria-label="Send">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <input type="file" id="cc-photo-input" accept="image/*" style="display:none" onchange="onConvPhoto(this.files[0])"/>
+</div>
+
+<div class="chat-layer" id="friends-screen">
+  <div class="ch-head">
+    <button class="ch-ibtn" onclick="closeFriends()" aria-label="Back">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="ch-title center">FRIENDS</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="ch-body">
+    <div class="fr-add">
+      <div class="pf-at-wrap"><span>@</span><input id="fr-name" class="pf-input pf-at" maxlength="21" placeholder="username" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')friendAdd()"/></div>
+      <button class="ch-btn lime" style="padding:0 16px" onclick="friendAdd()">Add</button>
+    </div>
+    <div class="ch-status" id="fr-status"></div>
+    <div id="fr-list"></div>
+  </div>
+</div>
+
+<div class="chat-layer" id="chat-new">
+  <div class="ch-head">
+    <button class="ch-ibtn" onclick="closeNewChat()" aria-label="Back">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="ch-title" id="cn-title">New chat</div>
+    <button class="ch-ibtn lime" id="cn-go" onclick="newChatGo()" style="display:none">Create</button>
+  </div>
+  <div class="ch-body">
+    <div id="cn-name-wrap" style="padding:14px 14px 0;display:none">
+      <input id="cn-name" class="pf-input" maxlength="40" placeholder="Group name, e.g. Bank &amp; Afton crew"/>
+    </div>
+    <div id="cn-list"></div>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="ch-sheet-backdrop" onclick="closeChatSheet()"></div>
+<div class="action-sheet" id="ch-sheet"></div>
+<div id="cc-viewer" onclick="this.classList.remove('show')"><img id="cc-viewer-img" alt=""/></div>
 <div id="update-banner" role="status">
   <div class="ub-text"><div class="ub-title" id="ub-title"></div><div class="ub-sub" id="ub-sub"></div></div>
   <button class="ub-go" id="ub-go"></button>
@@ -10212,57 +11763,78 @@ window.addEventListener('resize', () => {
 </div>
 <div id="settings-screen">
   <div class="settings-header">
-    <div class="settings-title">PROFILE</div>
-    <div id="pf-saved" class="pf-saved">Saved ✓</div>
+    <button class="pf-hbtn pf-hbtn-l" id="pf-cancel" onclick="cancelProfileEdit()">Cancel</button>
+    <div class="settings-title" id="pf-title">PROFILE</div>
+    <button class="pf-hbtn pf-hbtn-r" id="pf-save" onclick="saveProfileEdit()">Save</button>
   </div>
-  <div class="settings-body">
-    <div class="pf-card">
-      <div class="pf-avatar" onclick="document.getElementById('pf-avatar-input').click()">
-        <img id="pf-avatar-img" alt=""/>
-        <span id="pf-avatar-fallback">🌲</span>
+  <div class="settings-body" id="pf-body">
+    <!-- ===== VIEW ===== -->
+    <div id="pf-view">
+      <div class="pf-hero">
+        <div class="pf-cover"></div>
+        <div class="pf-avatar pf-avatar-lg">
+          <img id="pf-avatar-img" alt=""/>
+          <span id="pf-avatar-fallback">🌲</span>
+        </div>
+        <div class="pf-handle" id="pf-handle">@username</div>
+        <div class="pf-meta" id="pf-meta"></div>
+        <div class="pf-bio-view" id="pf-bio-view"></div>
+        <div class="pf-chips pf-chips-view" id="pf-chips-view"></div>
+        <div class="pf-empty-hint" id="pf-empty-hint">Add a bio, your experience and tickets so your crew knows what you do.</div>
+        <button class="pf-edit-btn" onclick="openProfileEdit()">Edit profile</button>
+      </div>
+      <div class="pf-stats">
+        <div class="pf-stat"><div class="pf-stat-n" id="pf-stat-maps">0</div><div class="pf-stat-l">Maps</div></div>
+        <div class="pf-stat"><div class="pf-stat-n" id="pf-stat-shared">–</div><div class="pf-stat-l">Shared</div></div>
+        <div class="pf-stat"><div class="pf-stat-n" id="pf-stat-ha">–</div><div class="pf-stat-l">Hectares</div></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-label">Settings</div>
+        <div class="settings-row">
+          <div class="settings-row-text">
+            <div class="settings-row-title">Forestry Field Tracker</div>
+            <div class="settings-row-sub" id="pf-version">Free GeoPDF field tool for UK forestry contractors.</div>
+          </div>
+          <button class="pf-add" id="pf-update-btn" style="display:none;padding:10px 14px;" onclick="checkForUpdates(true)">Check for updates</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EDIT ===== -->
+    <div id="pf-edit">
+      <div class="pf-avatar pf-avatar-lg pf-avatar-tap" onclick="document.getElementById('pf-avatar-input').click()">
+        <img id="pf-edit-avatar-img" alt=""/>
+        <span id="pf-edit-avatar-fallback">🌲</span>
         <div class="pf-avatar-edit">✎</div>
       </div>
-      <div class="pf-handle" id="pf-handle">@username</div>
-      <div class="pf-meta" id="pf-meta"></div>
-      <div class="pf-bio-view" id="pf-bio-view"></div>
-      <div class="pf-chips pf-chips-view" id="pf-chips-view"></div>
-    </div>
+      <div class="pf-avatar-label">Tap to change photo</div>
 
-    <div class="settings-section">
-      <div class="settings-section-label">Username</div>
-      <div class="pf-at-wrap"><span>@</span><input id="pf-username" class="pf-input pf-at" maxlength="21" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="onProfileInput()"/></div>
-      <div class="pf-hint" id="pf-username-hint">3–20 letters, numbers, _ or .</div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-label">Bio</div>
-      <textarea id="pf-bio" class="pf-input" maxlength="160" rows="3" placeholder="e.g. Planting and fencing across Ayrshire and Argyll" oninput="onProfileInput()"></textarea>
-      <div class="pf-hint" id="pf-bio-count" style="text-align:right;">0/160</div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-label">Experience <span class="pf-opt">optional</span></div>
-      <div class="pf-seg" id="pf-exp"></div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-label">Tickets &amp; competences <span class="pf-opt">optional</span></div>
-      <div class="pf-chips" id="pf-tickets"></div>
-      <div class="pf-add-row">
-        <input id="pf-ticket-custom" class="pf-input" maxlength="30" placeholder="Add another…" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTicket();}"/>
-        <button class="pf-add" onclick="addCustomTicket()">Add</button>
+      <div class="settings-section">
+        <div class="settings-section-label">Username</div>
+        <div class="pf-at-wrap"><span>@</span><input id="pf-username" class="pf-input pf-at" maxlength="21" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="onProfileInput()"/></div>
+        <div class="pf-hint" id="pf-username-hint">3–20 letters, numbers, _ or .</div>
       </div>
-    </div>
 
-    <div class="settings-section">
-      <div class="settings-section-label">Settings</div>
-      <div class="settings-row">
-        <div class="settings-row-text">
-          <div class="settings-row-title">Forestry Field Tracker</div>
-          <div class="settings-row-sub" id="pf-version">Free GeoPDF field tool for UK forestry contractors.</div>
+      <div class="settings-section">
+        <div class="settings-section-label">Bio</div>
+        <textarea id="pf-bio" class="pf-input" maxlength="160" rows="3" placeholder="e.g. Planting and fencing across Ayrshire and Argyll" oninput="onProfileInput()"></textarea>
+        <div class="pf-hint" id="pf-bio-count" style="text-align:right;">0/160</div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-label">Experience <span class="pf-opt">optional</span></div>
+        <div class="pf-seg" id="pf-exp"></div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-label">Tickets &amp; competences <span class="pf-opt">optional</span></div>
+        <div class="pf-chips" id="pf-tickets"></div>
+        <div class="pf-add-row">
+          <input id="pf-ticket-custom" class="pf-input" maxlength="30" placeholder="Add another…" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTicket();}"/>
+          <button class="pf-add" onclick="addCustomTicket()">Add</button>
         </div>
-        <button class="pf-add" id="pf-update-btn" style="display:none;padding:10px 14px;" onclick="checkForUpdates(true)">Check for updates</button>
       </div>
+      <button class="pf-save-big" onclick="saveProfileEdit()">Save profile</button>
     </div>
   </div>
   <input type="file" id="pf-avatar-input" accept="image/*" style="display:none" onchange="onProfileAvatarPicked(this.files[0])"/>
@@ -10280,7 +11852,11 @@ window.addEventListener('resize', () => {
       <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
       <span class="bn-label">Squad</span>
     </button>
-    <button class="bn-btn active" id="bn-settings-s" onclick="openSettings()">
+    <button class="bn-btn" id="bn-chat-s" onclick="openChat()">
+        <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="bn-label">Chat</span><span class="bn-badge"></span>
+      </button>
+      <button class="bn-btn active" id="bn-settings-s" onclick="openSettings()">
       <span class="bn-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
       <span class="bn-label">Profile</span>
     </button>
