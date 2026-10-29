@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "704004237016",
+    "project_id": "forestryfieldtracker",
+    "storage_bucket": "forestryfieldtracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:704004237016:android:5912de559a0277b50259ad",
+        "android_client_info": {
+          "package_name": "uk.scotapps.fft"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIuGOklPVVvhqaojHUUY3GRxUqMoVy1sk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
