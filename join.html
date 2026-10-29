@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Join squad · Forestry Field Tracker</title>
+<meta name="theme-color" content="#0a100d">
+<meta property="og:title" content="Join my squad on Forestry Field Tracker">
+<meta property="og:description" content="Share tracked ground and maps with your crew.">
+<style>
+  :root{--leaf:#d9ff4f;--text:#eef3ec;--dim:#9ba89e;--faint:#6c7a70}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(ellipse at 50% -10%,#1c3510 0%,#0a100d 55%,#050704 100%);color:var(--text);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{width:100%;max-width:380px;text-align:center}
+  .logo{width:84px;height:84px;margin:0 auto 18px;filter:drop-shadow(0 0 18px rgba(184,255,62,.45))}
+  .kicker{font-size:11px;letter-spacing:2.5px;color:var(--faint);font-weight:700;text-transform:uppercase}
+  h1{font-size:26px;margin:8px 0 6px;font-weight:800}
+  p{color:var(--dim);line-height:1.5;margin:0 0 22px;font-size:14px}
+  .btn{display:block;width:100%;padding:15px;border-radius:14px;font-weight:800;font-size:15px;text-decoration:none;margin-bottom:10px;border:1px solid transparent}
+  .primary{background:var(--leaf);color:#0a0d0c;box-shadow:0 0 24px rgba(217,255,79,.3)}
+  .secondary{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:var(--text)}
+  .code{margin-top:18px;font-size:13px;color:var(--faint)}
+  .code b{font-family:ui-monospace,monospace;color:var(--leaf);letter-spacing:2px;font-size:16px}
+  .bad{color:#ff6b5b}
+</style>
+</head>
+<body>
+<div class="card">
+  <svg class="logo" viewBox="0 0 100 120" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6ff78"/><stop offset="1" stop-color="#78c434"/></linearGradient></defs>
+    <path d="M50 4C26 4 10 21 10 43c0 24 40 72 40 72s40-48 40-72C90 21 74 4 50 4z" fill="url(#g)"/>
+    <circle cx="50" cy="42" r="26" fill="#060905"/>
+    <g fill="#c9f56f"><polygon points="50,22 40,37 60,37"/><polygon points="50,30 35,49 65,49"/><polygon points="50,40 30,63 70,63"/></g>
+  </svg>
+  <div class="kicker">Forestry Field Tracker</div>
+  <h1 id="title">Join the squad</h1>
+  <p id="sub">Share tracked ground and maps with your crew.</p>
+  <a class="btn primary" id="open-app" href="#">Open in the FFT app</a>
+  <a class="btn secondary" id="open-web" href="#">Use FFT in my browser</a>
+  <div class="code" id="code-line"></div>
+</div>
+<script>
+  // Invite link: join.html?c=CODE&n=Squad%20Name
+  var q = new URLSearchParams(location.search);
+  var code = (q.get('c') || q.get('code') || q.get('join') || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  var name = (q.get('n') || '').slice(0, 60);
+  var base = location.href.replace(/[^\/]*(\?.*)?$/, '');           // folder this page lives in
+  var webUrl = base + 'index.html?join=' + encodeURIComponent(code);
+  // Android: open the app if installed (fft://join?code=…), otherwise fall back to the web version
+  var appUrl = 'intent://join?code=' + encodeURIComponent(code) +
+               '#Intent;scheme=fft;package=uk.scotapps.fft;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
+  if (!code) {
+    document.getElementById('title').textContent = 'Invite link not valid';
+    document.getElementById('sub').innerHTML = '<span class="bad">This link is missing its squad code.</span> Ask for a new invite.';
+    document.getElementById('open-app').style.display = 'none';
+    document.getElementById('open-web').style.display = 'none';
+  } else {
+    if (name) document.getElementById('title').textContent = 'Join ' + name;
+    document.getElementById('open-app').href = /Android/i.test(navigator.userAgent) ? appUrl : webUrl;
+    document.getElementById('open-web').href = webUrl;
+    document.getElementById('code-line').innerHTML = 'Squad code <b>' + code + '</b><br>In the app: Squad → Join squad';
+  }
+</script>
+</body>
+</html>
