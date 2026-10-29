@@ -42,15 +42,18 @@ jobs:
           npm install
           # App: invite links (fft://join?code=…). Share: share sheet.
           # Updater: over-the-air updates of the app screens (self-hosted on GitHub Releases).
-          npm install @capacitor/app@^8 @capacitor/share@^8 @capgo/capacitor-updater@^8
+          # Push: chat notifications (Firebase — needs google-services.json in the repo root).
+          npm install @capacitor/app@^8 @capacitor/share@^8 @capgo/capacitor-updater@^8 @capacitor/push-notifications@^8
 
       - name: Work out the app-shell fingerprint
         run: |
           # Anything here changes the installed app itself (plugins, permissions,
           # icons, build settings) and needs a full reinstall. index.html is NOT
           # included — changes to it are delivered over the air.
-          NATIVE_ID=$(cat package.json capacitor.config.json .github/workflows/*.yml icon-only.png icon-foreground.png icon-background.png ic_stat_fft.png 2>/dev/null | sha256sum | cut -c1-12)
+          NATIVE_ID=$(cat package.json capacitor.config.json .github/workflows/*.yml icon-only.png icon-foreground.png icon-background.png ic_stat_fft.png google-services.json 2>/dev/null | sha256sum | cut -c1-12)
           echo "NATIVE_ID=$NATIVE_ID" >> "$GITHUB_ENV"
+          # Chat notifications only work (and only switch on) when Firebase is set up
+          if [ -f google-services.json ]; then echo "FFT_PUSH=true" >> "$GITHUB_ENV"; else echo "FFT_PUSH=false" >> "$GITHUB_ENV"; echo "::warning::No google-services.json — chat works but without notifications"; fi
           echo "Build $BUILD_NO · app shell $NATIVE_ID"
 
       - name: Updater settings
@@ -86,7 +89,7 @@ jobs:
           fi
           cp "$CJS" www/capacitor.js
           # Build info first (the app uses it to check for updates), then Capacitor
-          sed -i "0,/<script/s##<script>window.FFT_BUILD={build:$BUILD_NO,native:\"$NATIVE_ID\"};</script>\n<script src=\"capacitor.js\"></script>\n<script#" www/index.html
+          sed -i "0,/<script/s##<script>window.FFT_BUILD={build:$BUILD_NO,native:\"$NATIVE_ID\",push:$FFT_PUSH};</script>\n<script src=\"capacitor.js\"></script>\n<script#" www/index.html
           grep -n "FFT_BUILD\|capacitor.js" www/index.html | head -3
 
       - name: Bundle libraries so the app opens with no signal
@@ -111,7 +114,11 @@ jobs:
           grep -n 'lib/' www/index.html | head
 
       - name: Create Android project
-        run: npx cap add android
+        run: |
+          npx cap add android
+          # Firebase (chat notifications). The Capacitor template switches on the
+          # Google services plugin automatically when this file is present.
+          if [ -f google-services.json ]; then cp google-services.json android/app/google-services.json; echo "Firebase config added"; fi
 
       - name: Permissions, version number
         run: |
@@ -134,6 +141,11 @@ jobs:
           open(p, 'w').write(s)
           PY
           grep -n 'scheme="fft"' "$M"
+          # Chat notifications: small white tree icon + lime colour
+          sed -i 's#</application>#    <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_fft" />\n        <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:resource="@color/fft_lime" />\n        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="chat" />\n    </application>#' "$M"
+          mkdir -p android/app/src/main/res/values
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="fft_lime">#d9ff4f</color>\n</resources>\n' > android/app/src/main/res/values/fft_colors.xml
+          grep -n "firebase.messaging" "$M"
           # Every build gets a higher versionCode, which Android needs to accept an update
           sed -i "s/versionCode [0-9]*/versionCode $BUILD_NO/" android/app/build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"1.0.$BUILD_NO\"/" android/app/build.gradle
